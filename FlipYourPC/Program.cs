@@ -1,3 +1,9 @@
+using FlipYourPC.Data;
+using FlipYourPC.Services;
+using FlipYourPC.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
+
 namespace FlipYourPC
 {
     public class Program
@@ -6,8 +12,21 @@ namespace FlipYourPC
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddScoped<IComponentService, ComponentService>();
+            builder.Services.AddScoped<IPCService, PCService>();
+
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("Connection")));
+
+            builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+            });
 
             var app = builder.Build();
 
