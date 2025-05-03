@@ -15,6 +15,18 @@ namespace FlipYourPC.Services
         }
         public async Task CreateComponentAsync(Component component)
         {
+            var inventory = await _appDbContext.Inventories.FirstOrDefaultAsync();
+            if (inventory == null)
+            {
+                inventory = new Inventory
+                {
+                    Components = new List<Component>()
+                };
+
+                _appDbContext.Inventories.Add(inventory);
+            }
+
+            inventory.Components.Add(component);
             await _appDbContext.Components.AddAsync(component);
             await _appDbContext.SaveChangesAsync();
         }

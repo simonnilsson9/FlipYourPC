@@ -11,30 +11,41 @@ namespace FlipYourPC.Services
     public class PCService : IPCService
     {
         private readonly AppDbContext _appDbContext;
-        private readonly IMapper _mapper;
         public PCService(AppDbContext appDbContext)
         {
             _appDbContext = appDbContext;
         }
-        public async Task CreatePCAsync(PCDTO pcDTO)
+
+        public async Task AddComponentToPCAsync(Guid pcID, List<Guid> componentIds)
         {
-            var pc = new PC
+            var pc = await _appDbContext.PCs.Include(p => p.Components).FirstOrDefaultAsync(p => p.Id == pcID);
+
+            if(pc == null)
             {
-                Name = pcDTO.Name,
-                Description = pcDTO.Description,
-                Price = pcDTO.Price,
-                ImageURL = pcDTO.ImageURL,
-                Components = new List<Component>()
-            };
-            
-            foreach (var componentId in pcDTO.ComponentIds)
+                throw new ArgumentException("PC not found.");
+            }
+
+            foreach(var componentId in componentIds)
             {
                 var component = await _appDbContext.Components.FirstOrDefaultAsync(c => c.Id == componentId);
                 if(component != null)
                 {
                     pc.Components.Add(component);
+
+                    _appDbContext.Components.Remove(component);
                 }
             }
+
+            await _appDbContext.SaveChangesAsync();
+        }
+
+        public async Task CreatePCAsync(PCDTO pcDTO)
+        {
+            var pc = new PC
+            {
+                Name = pcDTO.Name,
+                Components = new List<Component>()
+            };                       
 
             await _appDbContext.PCs.AddAsync(pc);
             await _appDbContext.SaveChangesAsync();

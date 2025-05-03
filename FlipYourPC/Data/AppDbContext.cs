@@ -12,6 +12,7 @@ namespace FlipYourPC.Data
 
         public DbSet<Component> Components { get; set; }
         public DbSet<PC> PCs { get; set; }
+        public DbSet<Inventory> Inventories { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
