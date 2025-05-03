@@ -1,4 +1,5 @@
-﻿using FlipYourPC.Models;
+﻿using FlipYourPC.Entities;
+using FlipYourPC.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlipYourPC.Data
@@ -13,6 +14,7 @@ namespace FlipYourPC.Data
         public DbSet<Component> Components { get; set; }
         public DbSet<PC> PCs { get; set; }
         public DbSet<Inventory> Inventories { get; set; }
+        public DbSet<User> Users { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
