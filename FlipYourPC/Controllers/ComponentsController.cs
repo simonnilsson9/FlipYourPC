@@ -35,8 +35,7 @@ namespace FlipYourPC.Controllers
                 response.StatusCode = HttpStatusCode.NotFound;
                 response.ErrorMessages.Add(ex.Message);
                 return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-     
+            }     
         }
 
         [HttpGet]

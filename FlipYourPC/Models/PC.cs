@@ -5,8 +5,9 @@
         public Guid Id { get; set; }
         public required string Name { get; set; }
         public int Description { get; set; }
-        public required List<Component> Components { get; set; }
-        public required int Price { get; set; }
+        public List<Component> Components { get; set; }
+        public int Price { get; set; }
         public string ImageURL { get; set; }
+        public bool IsSold { get; set; } = false;
     }
 }

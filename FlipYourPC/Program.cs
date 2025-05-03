@@ -14,6 +14,7 @@ namespace FlipYourPC
 
             builder.Services.AddScoped<IComponentService, ComponentService>();
             builder.Services.AddScoped<IPCService, PCService>();
+            builder.Services.AddScoped<IInventoryService, InventoryService>();
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
