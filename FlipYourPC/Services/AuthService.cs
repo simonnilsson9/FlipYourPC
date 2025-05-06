@@ -22,7 +22,7 @@ namespace FlipYourPC.Services
         public AuthService(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
-            _configuration = configuration;            
+            _configuration = configuration;
         }
         public async Task<TokenResponseDTO?> LoginAsync(UserDTO request)
         {
@@ -52,7 +52,7 @@ namespace FlipYourPC.Services
         public async Task<User?> RegisterAsync(UserDTO request)
         {
 
-            if(await _context.Users.AnyAsync(u => u.Email == request.Email))
+            if(await _context.Users.AnyAsync(u => u.Email == request.Email || u.Username == request.Username))
             {
                 return null;
             }
@@ -62,6 +62,7 @@ namespace FlipYourPC.Services
                 .HashPassword(user, request.Password);
 
             user.Email = request.Email;
+            user.Username = request.Username;
             user.PasswordHash = hashedPassword;
 
             _context.Users.Add(user);
@@ -132,6 +133,6 @@ namespace FlipYourPC.Services
                 );
 
             return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
-        }
+        }        
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace FlipYourPC.Entities
+﻿using FlipYourPC.Models;
+
+namespace FlipYourPC.Entities
 {
     public class User
     {
@@ -15,5 +17,6 @@
         public string Role { get; set; } = string.Empty;
         public string? RefreshToken { get; set; }
         public DateTime? RefreshTokenExpiryTime { get; set; }
+        public Inventory? Inventory { get; set; }
     }
 }
