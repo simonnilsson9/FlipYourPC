@@ -1,0 +1,11 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "Frontend-React\\frontend-react.esproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
