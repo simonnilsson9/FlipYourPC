@@ -5,6 +5,10 @@
       {
         "Path": "Frontend-React\\frontend-react.esproj",
         "Action": "Start"
+      },
+      {
+        "Path": "FlipYourPC\\FlipYourPC.csproj",
+        "Action": "Start"
       }
     ]
   }

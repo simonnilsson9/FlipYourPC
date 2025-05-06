@@ -1,5 +1,7 @@
 ﻿using FlipYourPC.Models;
+using FlipYourPC.Services;
 using FlipYourPC.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -11,9 +13,11 @@ namespace FlipYourPC.Controllers
     public class ComponentsController : ControllerBase
     {
         private readonly IComponentService _componentService;
-        public ComponentsController(IComponentService service)
+        private readonly IInventoryService _inventoryService;
+        public ComponentsController(IComponentService service, IInventoryService inventoryService)
         {
             _componentService = service;
+            _inventoryService = inventoryService;
         }
 
         [HttpGet]
@@ -38,6 +42,7 @@ namespace FlipYourPC.Controllers
             }     
         }
 
+        [Authorize]
         [HttpGet]
         [Route("{id:guid}")]
         public async Task<IActionResult> GetComponentById([FromRoute] Guid id)
@@ -68,6 +73,8 @@ namespace FlipYourPC.Controllers
             }
         }
 
+        [Authorize]
+        [HttpPost]
         public async Task<IActionResult> CreateComponent([FromBody] Component component)
         {
             var response = new APIResponse();
@@ -81,10 +88,16 @@ namespace FlipYourPC.Controllers
                     return BadRequest(response);
                 }
 
+                // Lägg till komponenten i databasen (Components-tabellen)
                 await _componentService.CreateComponentAsync(component);
+
+                // Lägg till komponenten i inventory
+                await _inventoryService.AddComponentToInventoryAsync(component);
+
                 response.IsSuccess = true;
                 response.StatusCode = HttpStatusCode.Created;
                 response.Result = component;
+
                 return CreatedAtAction(nameof(GetComponentById), new { id = component.Id }, response);
             }
             catch (Exception ex)
@@ -96,6 +109,7 @@ namespace FlipYourPC.Controllers
             }
         }
 
+        [Authorize]
         [HttpPut]
         [Route("{id:guid}")]
         public async Task<IActionResult> UpdateComponent([FromRoute] Guid id, Component component)
@@ -133,6 +147,7 @@ namespace FlipYourPC.Controllers
             }
         }
 
+        [Authorize]
         [HttpDelete]
         [Route("{id:guid}")]
         public async Task<IActionResult> DeleteComponent([FromRoute] Guid id)
@@ -149,7 +164,12 @@ namespace FlipYourPC.Controllers
                     return NotFound(response);
                 }
 
+                // Ta bort komponenten från inventory
+                await _inventoryService.RemoveComponentFromInventoryAsync(id);
+
+                // Ta bort komponenten från Components-tabellen
                 await _componentService.DeleteComponentAsync(component);
+
                 response.IsSuccess = true;
                 response.StatusCode = HttpStatusCode.NoContent;
                 return NoContent();
@@ -163,6 +183,7 @@ namespace FlipYourPC.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet]
         [Route("name/{name}")]
         public async Task<IActionResult> GetComponentByName([FromRoute] string name)

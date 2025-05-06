@@ -115,7 +115,6 @@ namespace FlipYourPC.Controllers
         public async Task<IActionResult> AddComponentsToPC([FromRoute] Guid pcId, [FromBody] List<Guid> componentIds)
         {
             var response = new APIResponse();
-
             try
             {
                 if (componentIds == null || !componentIds.Any())
@@ -126,7 +125,14 @@ namespace FlipYourPC.Controllers
                     return BadRequest(response);
                 }
 
+                // Lägg till komponenterna till PC:n
                 await _pcService.AddComponentToPCAsync(pcId, componentIds);
+
+                // Ta bort komponenterna från inventory
+                foreach (var componentId in componentIds)
+                {
+                    await _inventoryService.RemoveComponentFromInventoryAsync(componentId);
+                }
 
                 response.IsSuccess = true;
                 response.StatusCode = HttpStatusCode.OK;

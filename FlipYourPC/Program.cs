@@ -14,11 +14,14 @@ namespace FlipYourPC
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            
+            builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddScoped<IComponentService, ComponentService>();
             builder.Services.AddScoped<IPCService, PCService>();
             builder.Services.AddScoped<IInventoryService, InventoryService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -35,6 +38,17 @@ namespace FlipYourPC
                         ValidateIssuerSigningKey = true
                     }; 
                 });
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins",
+                     builder =>
+                     {
+                         builder.AllowAnyOrigin()
+                                .AllowAnyMethod()
+                                .AllowAnyHeader();
+                     });
+            });
 
             builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("Connection")));
@@ -55,6 +69,7 @@ namespace FlipYourPC
                 app.UseHsts();
             }
 
+            app.UseCors("AllowAllOrigins");
             app.UseHttpsRedirection();
             app.UseRouting();
 
