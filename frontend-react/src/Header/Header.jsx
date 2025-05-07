@@ -1,17 +1,17 @@
-import React from 'react';
+Ôªøimport React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
 
 const Header = () => {
     const navigate = useNavigate();
 
-    // Kontrollera om anv‰ndaren ‰r inloggad genom att se om accessToken finns i localStorage
+    // Kontrollera om anv√§ndaren √§r inloggad genom att se om accessToken finns i localStorage
     const isLoggedIn = localStorage.getItem('accessToken');
 
     // Hantera logga ut
     const handleLogout = () => {
-        localStorage.removeItem('accessToken');  // Ta bort accessToken frÂn localStorage
-        navigate("/login");  // Navigera anv‰ndaren till login-sidan
+        localStorage.removeItem('accessToken');  // Ta bort accessToken fr√•n localStorage
+        navigate("/login");  // Navigera anv√§ndaren till login-sidan
     };
 
     return (
@@ -31,10 +31,10 @@ const Header = () => {
                                 <Link to="/inventory" className="nav-link">Components</Link>
                             </li>
                             <li className="nav-item">
-                                <Link to="/pc" className="nav-link">PC Builder</Link>
+                                <Link to="/pc-builder" className="nav-link">PC Builder</Link>
                             </li>
                             <li className="nav-item">
-                                {/* Om anv‰ndaren ‰r inloggad, visa Logga ut, annars visa Logga in */}
+                                {/* Om anv√§ndaren √§r inloggad, visa Logga ut, annars visa Logga in */}
                                 {isLoggedIn ? (
                                     <button className="btn btn-link nav-link" onClick={handleLogout}>Logga ut</button>
                                 ) : (
