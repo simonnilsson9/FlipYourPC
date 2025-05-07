@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlipYourPC.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250503204459_Roles")]
-    partial class Roles
+    [Migration("20250506172156_New")]
+    partial class New
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -51,6 +51,12 @@ namespace FlipYourPC.Migrations
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Role")
                         .HasColumnType("nvarchar(max)");
@@ -111,7 +117,13 @@ namespace FlipYourPC.Migrations
                     b.Property<int>("TotalValue")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Inventories");
                 });
@@ -137,7 +149,12 @@ namespace FlipYourPC.Migrations
                     b.Property<int>("Price")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("PCs");
                 });
@@ -153,6 +170,35 @@ namespace FlipYourPC.Migrations
                         .HasForeignKey("PCId");
 
                     b.Navigation("PC");
+                });
+
+            modelBuilder.Entity("FlipYourPC.Models.Inventory", b =>
+                {
+                    b.HasOne("FlipYourPC.Entities.User", "User")
+                        .WithOne("Inventory")
+                        .HasForeignKey("FlipYourPC.Models.Inventory", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FlipYourPC.Models.PC", b =>
+                {
+                    b.HasOne("FlipYourPC.Entities.User", "User")
+                        .WithMany("PCs")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FlipYourPC.Entities.User", b =>
+                {
+                    b.Navigation("Inventory");
+
+                    b.Navigation("PCs");
                 });
 
             modelBuilder.Entity("FlipYourPC.Models.Inventory", b =>

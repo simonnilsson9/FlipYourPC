@@ -1,6 +1,5 @@
 ﻿using FlipYourPC.Data;
 using FlipYourPC.Entities;
-using FlipYourPC.Migrations;
 using FlipYourPC.Models.DTO;
 using FlipYourPC.Services.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;

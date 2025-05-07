@@ -18,5 +18,6 @@ namespace FlipYourPC.Entities
         public string? RefreshToken { get; set; }
         public DateTime? RefreshTokenExpiryTime { get; set; }
         public Inventory? Inventory { get; set; }
+        public List<PC> PCs { get; set; } = new List<PC>();
     }
 }

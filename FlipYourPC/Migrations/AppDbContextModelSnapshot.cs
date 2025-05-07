@@ -146,7 +146,12 @@ namespace FlipYourPC.Migrations
                     b.Property<int>("Price")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("PCs");
                 });
@@ -175,9 +180,22 @@ namespace FlipYourPC.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("FlipYourPC.Models.PC", b =>
+                {
+                    b.HasOne("FlipYourPC.Entities.User", "User")
+                        .WithMany("PCs")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("FlipYourPC.Entities.User", b =>
                 {
                     b.Navigation("Inventory");
+
+                    b.Navigation("PCs");
                 });
 
             modelBuilder.Entity("FlipYourPC.Models.Inventory", b =>
