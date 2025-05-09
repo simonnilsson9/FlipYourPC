@@ -1,4 +1,5 @@
-using FlipYourPC.Data;
+﻿using FlipYourPC.Data;
+using FlipYourPC.Models;
 using FlipYourPC.Services;
 using FlipYourPC.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -16,6 +17,9 @@ namespace FlipYourPC
             var builder = WebApplication.CreateBuilder(args);
             
             builder.Services.AddHttpContextAccessor();
+            builder.Services.Configure<CloudinarySettings>(
+            builder.Configuration.GetSection("Cloudinary"));
+
 
             builder.Services.AddScoped<IComponentService, ComponentService>();
             builder.Services.AddScoped<IPCService, PCService>();

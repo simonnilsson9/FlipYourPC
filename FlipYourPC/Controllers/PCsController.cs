@@ -95,6 +95,13 @@ namespace FlipYourPC.Controllers
 
                 await _pcService.AddComponentToPCAsync(pcId, componentIds);
 
+                var updatedPC = await _pcService.GetPCByIdAsync(pcId);
+                if(updatedPC != null)
+                {
+                    updatedPC.ComponentsTotalCost = updatedPC.Components.Sum(c => c.Price);
+                    await _pcService.UpdatePCAsync(updatedPC);
+                }
+
                 foreach (var componentId in componentIds)
                 {
                     await _inventoryService.RemoveComponentFromInventoryAsync(componentId);
@@ -168,6 +175,14 @@ namespace FlipYourPC.Controllers
             try
             {
                 await _pcService.RemoveComponentFromPCAsync(pcId, new List<Guid> { componentId });
+
+                var updatedPC = await _pcService.GetPCByIdAsync(pcId);
+                if (updatedPC != null)
+                {
+                    updatedPC.ComponentsTotalCost = updatedPC.Components.Sum(c => c.Price);
+                    await _pcService.UpdatePCAsync(updatedPC);
+                }
+
                 return Ok(new { message = "Component removed from PC." });
             }
             catch (Exception ex)

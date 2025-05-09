@@ -1,5 +1,7 @@
 ﻿import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Alert from "../Components/Alert";
+import ImageUploader from "../Components/ImageUploader";
 import {
     getAllPCs,
     createPC,
@@ -27,6 +29,7 @@ const PCBuilder = () => {
     const [pcPrice, setPcPrice] = useState("");
     const [pcImageURL, setPcImageURL] = useState("");
 
+    const [alert, setAlert] = useState(null); // typ { type, title, message }
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -42,6 +45,7 @@ const PCBuilder = () => {
             setPcs(all || []);
         } catch (err) {
             console.error("Error fetching PCs:", err);
+            showAlert("error", "Fel", "Kunde inte hämta dina PC's");
         }
     };
 
@@ -53,6 +57,7 @@ const PCBuilder = () => {
             setAvailableComponents(inv.components || []);
         } catch (err) {
             console.error("Error fetching components:", err);
+            showAlert("error", "Fel", "Kunde inte ladda dina komponenter");
         }
     };
 
@@ -64,8 +69,10 @@ const PCBuilder = () => {
             setShowCreateModal(false);
             setPcName("");
             fetchPCs();
+            showAlert("success", "Skapad", "Din PC har skapats.");
         } catch (err) {
             console.error("Error creating PC:", err);
+            showAlert("error", "Fel", "Kunde inte skapa bygget.");
         }
     };
 
@@ -75,8 +82,10 @@ const PCBuilder = () => {
         try {
             await deletePC(id, token);
             fetchPCs();
+            showAlert("success", "Raderad", "Din PC har raderats.");
         } catch (err) {
             console.error("Error deleting PC:", err);
+            showAlert("error", "Fel", "Kunde inte radera din PC.");
         }
     };
 
@@ -91,13 +100,16 @@ const PCBuilder = () => {
                     description: pcDescription,
                     price: parseInt(pcPrice),
                     imageURL: pcImageURL,
+                    isSold: currentPC.isSold
                 },
                 token
             );
             setShowEditModal(false);
             fetchPCs();
+            showAlert("success", "Uppdaterad", "Din PC har uppdaterats.");
         } catch (err) {
             console.error("Error updating PC:", err);
+            showAlert("error", "Fel", "Kunde inte uppdatera din PC.");
         }
     };
 
@@ -108,8 +120,10 @@ const PCBuilder = () => {
             await addComponentsToPC(currentPC.id, [compId], token);
             fetchPCs();
             fetchComponents();
+            showAlert("success", "Uppdaterad", "Komponenten tillagd till din PC.");
         } catch (err) {
             console.error("Error adding component:", err);
+            showAlert("error", "Fel", "Kunde inte lägga till dina komponenter.");
         }
     };
 
@@ -121,18 +135,78 @@ const PCBuilder = () => {
             setCurrentComponents((prev) => prev.filter((c) => c.id !== compId));
             fetchPCs();
             fetchComponents();
+            showAlert("success", "Borttagen", "Komponenten blev borttagen.");
         } catch (err) {
             console.error("Error removing component:", err);
+            showAlert("error", "Fel", "Kunde inte ta bort din komponent.");
+        }
+    };
+
+    const handleToggleSold = async (pc) => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+
+        try {
+            await updatePC(pc.id, {
+                name: pc.name,
+                description: pc.description,
+                price: pc.price,
+                imageURL: pc.imageURL,
+                isSold: !pc.isSold
+            }, token);
+
+            fetchPCs();
+            showAlert("success", "Uppdaterad", `Datorn har markerats som ${!pc.isSold ? "såld" : "tillbaka i lager"}.`);
+        } catch (err) {
+            console.error("Error toggling isSold:", err);
+            showAlert("error", "Fel", "Kunde inte uppdatera säljinformationen.");
+        }
+    };
+
+    const handleImageUpload = async (url, pc) => {
+        setPcImageURL(url);
+
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+
+        try {
+            await updatePC(pc.id, {
+                name: pc.name,
+                description: pc.description,
+                price: pc.price,
+                imageURL: url,
+                isSold: pc.isSold
+            }, token);
+
+            fetchPCs();
+            showAlert("success", "Bild uppladdad", "Bilden har sparats till din PC.");
+        } catch (err) {
+            console.error("Image update failed:", err);
+            showAlert("error", "Fel", "Kunde inte spara bilden.");
         }
     };
 
     // Filtrera pågående vs sålda
     const filtered = pcs.filter((pc) =>
-        activeTab === "ongoing" ? !pc.sold : pc.sold
+        activeTab === "ongoing" ? !pc.isSold : pc.isSold
     );
+
+    const showAlert = (type, title, message) => {
+        setAlert({ type, title, message });
+        setTimeout(() => setAlert(null), 4000); // auto-close efter 4 sek
+    };
+
 
     return (
         <div>
+            {alert && (
+                <Alert
+                    type={alert.type}
+                    title={alert.title}
+                    message={alert.message}
+                    onClose={() => setAlert(null)}
+                />
+            )}
             {/* --- Sida­header --- */}
             <div className="max-w-5xl mx-auto text-center mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
@@ -152,7 +226,7 @@ const PCBuilder = () => {
                             : "bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
                         }`}
                 >
-                    🖥️ Pågående byggen ({pcs.filter((p) => !p.sold).length})
+                    🖥️ Pågående byggen ({pcs.filter((p) => !p.isSold).length})
                 </button>
 
                 <button
@@ -162,7 +236,7 @@ const PCBuilder = () => {
                             : "bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
                         }`}
                 >
-                    🛒 Sålda byggen ({pcs.filter((p) => p.sold).length})
+                    🛒 Sålda byggen ({pcs.filter((p) => p.isSold).length})
                 </button>
 
                 <button
@@ -176,17 +250,70 @@ const PCBuilder = () => {
             <div className="flex flex-col items-center gap-8">
                 {filtered.length > 0 ? (
                     filtered.map((pc) => {
-                        const cost = pc.cost || 0;
+                        const cost = pc.componentsTotalCost || 0;
                         const price = pc.price || 0;
                         const profit = price - cost;
                         const profitPct = price ? Math.round((profit / price) * 100) : 0;
 
                         return (
-                            <div key={pc.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-5xl mx-auto mb-6">
+                            <div key={pc.id} className="relative bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-5xl mx-auto mb-6">
+
+                                {/* Header */}
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                                            {pc.name.charAt(0)}
+                                        </div>
+                                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                            {pc.name}
+                                        </h2>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        {/* Checkbox */}
+                                        <label className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                                            <input
+                                                type="checkbox"
+                                                checked={pc.isSold}
+                                                onChange={() => handleToggleSold(pc)}
+                                                className="mr-1 accent-blue-600"
+                                            />
+                                            Såld
+                                        </label>
+
+                                        {/* Delete button */}
+                                        <button
+                                            onClick={() => handleDeletePC(pc.id)}
+                                            title="Ta bort bygget"
+                                            className="text-gray-400 hover:text-red-500 text-xl"
+                                        >
+                                            🗑️
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Divider line */}
+                                <hr className="my-4 border-t border-gray-300 dark:border-gray-600" />
+
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
+
+                                    <div className="flex flex-col items-center justify-center py-2 text-center text-gray-600 dark:text-gray-300 text-sm">
+                                        {pc.imageURL ? (
+                                            <img
+                                                src={pc.imageURL}
+                                                alt="PC bild"
+                                                className="h-48 object-contain mb-2 border border-gray-400 dark:border-gray-600"
+                                            />
+                                        ) : (
+                                            <div className="h-48 w-full bg-gray-300 dark:bg-gray-600 mb-2 flex items-center justify-center text-gray-500 dark:text-gray-200 border border-gray-400 dark:border-gray-600">
+                                                Ingen bild
+                                            </div>
+                                        )}
+                                        <ImageUploader onUpload={(url) => handleImageUpload(url, pc)} />
+                                    </div>
+
                                     {/* Komponentlista */}
-                                    <div>
+                                    <div className="flex flex-col items-center text-center">
                                         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Specifikationer</h3>
                                         {pc.components.length > 0 ? (
                                             pc.components.map((c) => (
@@ -197,11 +324,6 @@ const PCBuilder = () => {
                                         ) : (
                                             <p className="text-gray-400 italic">Inga komponenter</p>
                                         )}
-                                    </div>
-
-                                    {/* Bildplaceholder */}
-                                    <div className="flex items-center justify-center bg-gray-200 dark:bg-gray-700 rounded h-32 text-center text-gray-600 dark:text-gray-300 text-sm">
-                                        Klicka för att ladda upp en bild
                                     </div>
 
                                     {/* Prisinfo */}
@@ -222,10 +344,10 @@ const PCBuilder = () => {
                                             Lägg till moms
                                         </button>
                                     </div>
-                                </div>
+                                </div>                                
 
                                 {/* Actionknappar */}
-                                <div className="flex flex-wrap gap-2 mt-6">
+                                <div className="flex justify-center flex-wrap gap-2 mt-4">
                                     <button
                                         className="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl font-medium rounded-lg text-sm px-5 py-2.5"
                                         onClick={() => {
@@ -237,7 +359,7 @@ const PCBuilder = () => {
                                             setShowEditModal(true);
                                         }}
                                     >
-                                        Redigera
+                                        Redigera Info
                                     </button>
                                     <button
                                         className="text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl font-medium rounded-lg text-sm px-5 py-2.5"
@@ -247,7 +369,7 @@ const PCBuilder = () => {
                                             setShowCompListModal(true);
                                         }}
                                     >
-                                        Visa
+                                        Komponenter
                                     </button>
                                     <button
                                         className="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl font-medium rounded-lg text-sm px-5 py-2.5"
@@ -256,8 +378,9 @@ const PCBuilder = () => {
                                             setShowAddCompModal(true);
                                         }}
                                     >
-                                        + Komp.
+                                        + Komponent
                                     </button>
+                                    
                                 </div>
                             </div>
                         );
@@ -304,7 +427,7 @@ const PCBuilder = () => {
             )}
 
             {showEditModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-opacity-50">
+                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-lg p-6">
                         <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Redigera PC-bygge</h2>
 

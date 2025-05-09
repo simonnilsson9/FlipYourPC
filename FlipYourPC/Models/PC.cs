@@ -13,5 +13,6 @@ namespace FlipYourPC.Models
         public bool IsSold { get; set; } = false;
         public Guid UserId { get; set; }
         public User User { get; set; }
+        public int ComponentsTotalCost { get; set; } = 0;
     }
 }
