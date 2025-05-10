@@ -38,6 +38,13 @@ const Header = () => {
             : 'text-white hover:text-blue-300'
         }`;
 
+    const isLoggedIn = !!localStorage.getItem('accessToken');
+
+    const handleLogout = () => {
+        localStorage.removeItem('accessToken');
+        window.location.href = '/login'; // tvinga omdirigering
+    };
+
     return (
         <nav className="bg-gray-800 border-b border-gray-700 text-white">
             <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
@@ -61,12 +68,21 @@ const Header = () => {
                         🌓
                     </button>
 
-                    <Link
-                        to="/login"
-                        className="bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center"
-                    >
-                        Logga in
-                    </Link>
+                    {isLoggedIn ? (
+                        <button
+                            onClick={handleLogout}
+                            className="bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 text-center"
+                        >
+                            Logga ut
+                        </button>
+                    ) : (
+                        <Link
+                            to="/login"
+                            className="bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center"
+                        >
+                            Logga in
+                        </Link>
+                    )}
 
                     <button
                         data-collapse-toggle="navbar-cta"
