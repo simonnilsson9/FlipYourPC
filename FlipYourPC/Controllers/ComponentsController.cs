@@ -129,7 +129,6 @@ namespace FlipYourPC.Controllers
                 existingComponent.Name = component.Name;
                 existingComponent.Price = component.Price;
                 existingComponent.Manufacturer = component.Manufacturer;
-                existingComponent.TotalStock = component.TotalStock;
                 existingComponent.Type = component.Type;
                 existingComponent.PCId = component.PCId;
 

@@ -30,6 +30,8 @@ const PCBuilder = () => {
     const [pcDescription, setPcDescription] = useState("");
     const [pcPrice, setPcPrice] = useState("");
     const [pcImageURL, setPcImageURL] = useState("");
+    const [listedAt, setListedAt] = useState("");
+    const [soldAt, setSoldAt] = useState("");
 
     const [alert, setAlert] = useState(null); // typ { type, title, message }
     const [activeAddType, setActiveAddType] = useState(null);
@@ -111,16 +113,18 @@ const PCBuilder = () => {
                 {
                     name: pcName,
                     description: pcDescription,
-                    price: parseInt(pcPrice),
+                    price: parseInt(pcPrice) || 0,
                     imageURL: pcImageURL,
-                    isSold: currentPC.isSold
+                    isSold: currentPC.isSold,
+                    listedAt: listedAt || currentPC.listedAt,
+                    soldAt: soldAt === "" ? null : soldAt
                 },
                 token
             );
             setShowEditModal(false);
             fetchPCs();
             showAlert("success", "Uppdaterad", "Din PC har uppdaterats.");
-        } catch (err) {
+        } catch (err) {            
             console.error("Error updating PC:", err);
             showAlert("error", "Fel", "Kunde inte uppdatera din PC.");
         }
@@ -166,9 +170,10 @@ const PCBuilder = () => {
                 description: pc.description,
                 price: pc.price,
                 imageURL: pc.imageURL,
-                isSold: !pc.isSold
-            }, token);
-
+                isSold: !pc.isSold,
+                listedAt: pc.listedAt,
+                soldAt: !pc.isSold ? new Date().toISOString() : null
+            }, token);            
             fetchPCs();
             showAlert("success", "Uppdaterad", `Datorn har markerats som ${!pc.isSold ? "såld" : "tillbaka i lager"}.`);
         } catch (err) {
@@ -229,7 +234,7 @@ const PCBuilder = () => {
                 />
             )}
             {/* --- Sida­header --- */}
-            <div className="max-w-5xl mx-auto text-center mb-8">
+            <div className="max-w-5xl mx-auto text-center mb-8 mt-8">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
                     PC-Byggaren
                 </h1>
@@ -387,12 +392,13 @@ const PCBuilder = () => {
                                                 <p className={`text-sm font-semibold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                                     Vinst: {profit} kr ({profitPct}%)
                                                 </p>
-                                                <button className="mt-3 px-3 py-1 bg-gray-300 dark:bg-gray-600 text-sm rounded hover:bg-gray-400 dark:hover:bg-gray-500">
-                                                    Lägg till moms
-                                                </button>
-                                            </div>
+                                                {pc.soldAt && (
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                        Såld: {new Date(pc.soldAt).toLocaleDateString()}
+                                                    </p>
+                                                )}                                                
+                                            </div>     
                                         </div>
-
                                         <div className="flex justify-center flex-wrap gap-2 mt-4">
                                             <button
                                                 className="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl font-medium rounded-lg text-sm px-5 py-2.5"
@@ -402,6 +408,8 @@ const PCBuilder = () => {
                                                     setPcDescription(pc.description || "");
                                                     setPcPrice(pc.price || "");
                                                     setPcImageURL(pc.imageURL || "");
+                                                    setListedAt(pc.listedAt ? pc.listedAt.split("T")[0] : "");
+                                                    setSoldAt(pc.soldAt ? pc.soldAt.split("T")[0] : "");
                                                     setShowEditModal(true);
                                                 }}
                                             >
@@ -499,6 +507,32 @@ const PCBuilder = () => {
                                 type="text"
                                 value={pcImageURL}
                                 onChange={(e) => setPcImageURL(e.target.value)}
+                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
+                            />
+                        </div>
+
+                        {/* Listat datum */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                                Listat datum
+                            </label>
+                            <input
+                                type="date"
+                                value={listedAt}
+                                onChange={(e) => setListedAt(e.target.value)}
+                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
+                            />
+                        </div>
+
+                        {/* Sålt datum */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                                Sålt datum (valfritt)
+                            </label>
+                            <input
+                                type="date"
+                                value={soldAt}
+                                onChange={(e) => setSoldAt(e.target.value)}
                                 className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
                             />
                         </div>

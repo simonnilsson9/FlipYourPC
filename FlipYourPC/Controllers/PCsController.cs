@@ -137,6 +137,8 @@ namespace FlipYourPC.Controllers
                 existingPC.Price = pcDTO.Price;
                 existingPC.ImageURL = pcDTO.ImageURL;
                 existingPC.IsSold = pcDTO.IsSold;
+                existingPC.ListedAt = pcDTO.ListedAt;
+                existingPC.SoldAt = pcDTO.SoldAt;
 
                 await _pcService.UpdatePCAsync(existingPC);
 
