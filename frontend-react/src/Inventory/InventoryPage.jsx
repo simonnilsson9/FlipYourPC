@@ -126,29 +126,28 @@ const InventoryPage = () => {
     }
 
     return (
-        <div className="max-w-6xl mx-auto px-4 py-8">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Lager</h1>
-                <button
-                    onClick={handleAddComponent}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                    + Lägg till komponent
-                </button>
-            </div>
-
-            <div className="flex justify-between items-center mb-6">
+        <div className="max-w-6xl mx-auto px-4 py-8 mt-8">           
+            <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-4 mb-6">
                 <div className="text-lg font-medium text-purple-600 dark:text-purple-400">
                     Totalt lagervärde: {totalValue.toLocaleString()} kr
                 </div>
-                <input
-                    type="text"
-                    placeholder="Sök komponent..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="px-4 py-2 rounded bg-gray-100 dark:bg-gray-700 text-sm text-gray-900 dark:text-white"
-                />
+                <div className="flex gap-2 items-center">
+                    <input
+                        type="text"
+                        placeholder="Sök komponent..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="px-4 py-2 rounded bg-gray-100 dark:bg-gray-700 text-sm text-gray-900 dark:text-white"
+                    />
+                    <button
+                        onClick={handleAddComponent}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                        + Lägg till komponent
+                    </button>
+                </div>
             </div>
+
 
             {Object.entries(groupedComponents).map(([type, comps]) => (
                 <div key={type} className="w-full bg-white dark:bg-gray-800 rounded-xl shadow-md mb-4 overflow-hidden">
@@ -174,9 +173,7 @@ const InventoryPage = () => {
                                     <tr className="border-b border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400">
                                         <th className="py-2">Namn</th>
                                         <th>Tillverkare</th>
-                                        <th>Antal</th>
-                                        <th>Värde/st</th>
-                                        <th>Totalvärde</th>
+                                        <th>Värde</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -185,7 +182,6 @@ const InventoryPage = () => {
                                         <tr key={comp.id} className="text-gray-800 dark:text-gray-200">
                                             <td className="py-2">{comp.name}</td>
                                             <td>{comp.manufacturer}</td>
-                                            <td>{comp.price} kr</td>
                                             <td>{comp.price} kr</td>
                                             <td className="space-x-2">
                                                 <button

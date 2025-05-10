@@ -1,7 +1,8 @@
-﻿import React, { useEffect } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 const Header = () => {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const location = useLocation();
 
     useEffect(() => {
@@ -85,40 +86,27 @@ const Header = () => {
                     )}
 
                     <button
-                        data-collapse-toggle="navbar-cta"
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
                         type="button"
                         className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-white rounded-lg md:hidden hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                        aria-controls="navbar-cta"
-                        aria-expanded="false"
                     >
                         <span className="sr-only">Öppna meny</span>
-                        <svg
-                            className="w-5 h-5"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 17 14"
-                            aria-hidden="true"
-                        >
-                            <path
-                                stroke="currentColor"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M1 1h15M1 7h15M1 13h15"
-                            />
+                        <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1h15M1 7h15M1 13h15" />
                         </svg>
                     </button>
                 </div>
 
                 <div
-                    className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1"
                     id="navbar-cta"
+                    className={`w-full overflow-hidden transition-all duration-300 ease-in-out md:flex md:w-auto md:order-1 ${isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                        }`}
                 >
-                    <ul className="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-700 rounded-lg bg-gray-800 md:flex-row md:space-x-8 md:mt-0 md:border-0 md:bg-gray-800 text-white">
-                        <li><Link to="/" className={linkClass('/')}>Dashboard</Link></li>
-                        <li><Link to="/inventory" className={linkClass('/inventory')}>Inventory</Link></li>
-                        <li><Link to="/pc-builder" className={linkClass('/pc-builder')}>PC-Builder</Link></li>
-                        <li><Link to="/contact" className={linkClass('/contact')}>Contact</Link></li>
+                    <ul className="flex flex-col items center font-medium p-4 md:p-0 mt-4 border border-gray-700 rounded-lg bg-gray-800 md:flex-row md:space-x-8 md:mt-0 md:border-0 md:bg-gray-800 text-white text-center">
+                        <li><Link to="/" onClick={() => setIsMenuOpen(false)} className={linkClass('/')}>Dashboard</Link></li>
+                        <li><Link to="/inventory" onClick={() => setIsMenuOpen(false)} className={linkClass('/inventory')}>Inventory</Link></li>
+                        <li><Link to="/pc-builder" onClick={() => setIsMenuOpen(false)} className={linkClass('/pc-builder')}>PC-Builder</Link></li>
+                        <li><Link to="/contact" onClick={() => setIsMenuOpen(false)} className={linkClass('/contact')}>Contact</Link></li>
                     </ul>
                 </div>
             </div>
