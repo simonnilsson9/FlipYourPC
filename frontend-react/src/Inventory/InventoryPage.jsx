@@ -211,45 +211,63 @@ const InventoryPage = () => {
 
             {/* Modal */}
             {showModal && (
-                <div className="fixed inset-0 z-50 backdrop-blur-sm flex items-center justify-center">
-                    <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-xl w-full max-w-lg">
+                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-lg p-6">
                         <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
                             {currentComponent?.id ? "Redigera komponent" : "Lägg till komponent"}
                         </h2>
 
-                        <div className="grid gap-4">
+                        {/* Namn */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Namn</label>
                             <input
                                 type="text"
-                                placeholder="Namn"
-                                className="p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
-                                value={currentComponent?.name}
+                                value={currentComponent?.name || ""}
                                 onChange={(e) => setCurrentComponent({ ...currentComponent, name: e.target.value })}
+                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
                             />
+                        </div>
+
+                        {/* Tillverkare */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Tillverkare</label>
                             <input
                                 type="text"
-                                placeholder="Tillverkare"
-                                className="p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
-                                value={currentComponent?.manufacturer}
+                                value={currentComponent?.manufacturer || ""}
                                 onChange={(e) => setCurrentComponent({ ...currentComponent, manufacturer: e.target.value })}
+                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
                             />
+                        </div>
+
+                        {/* Pris */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Pris (kr)</label>
                             <input
                                 type="number"
-                                placeholder="Pris"
-                                className="p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
-                                value={currentComponent?.price}
+                                value={currentComponent?.price || ""}
                                 onChange={(e) => setCurrentComponent({ ...currentComponent, price: e.target.value })}
+                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
                             />
+                        </div>
+
+                        {/* Antal */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Antal i lager</label>
                             <input
                                 type="number"
-                                placeholder="Antal i lager"
-                                className="p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
-                                value={currentComponent?.totalStock}
+                                value={currentComponent?.totalStock || ""}
                                 onChange={(e) => setCurrentComponent({ ...currentComponent, totalStock: e.target.value })}
+                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
                             />
+                        </div>
+
+                        {/* Typ */}
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Typ av komponent</label>
                             <select
-                                className="p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
-                                value={currentComponent?.type}
+                                value={currentComponent?.type || ""}
                                 onChange={(e) => setCurrentComponent({ ...currentComponent, type: e.target.value })}
+                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
                             >
                                 <option value="">Välj typ</option>
                                 {Object.values(ComponentTypeEnum).map((type) => (
@@ -258,16 +276,17 @@ const InventoryPage = () => {
                             </select>
                         </div>
 
-                        <div className="flex justify-end gap-2 mt-6">
+                        {/* Actionknappar */}
+                        <div className="flex justify-end space-x-2">
                             <button
                                 onClick={() => setShowModal(false)}
-                                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-sm"
+                                className="px-4 py-2 text-sm bg-gray-500 hover:bg-gray-700 rounded dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
                             >
                                 Avbryt
                             </button>
                             <button
                                 onClick={handleSave}
-                                className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                                className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded"
                             >
                                 Spara
                             </button>

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Alert from "../Components/Alert";
 import ImageUploader from "../Components/ImageUploader"; 
 import ComponentTypeEnum from "../Components/ComponentTypeEnum";
+import ConfirmDeleteModal from "../Components/ConfirmDeleteModal";
 import {
     getAllPCs,
     createPC,
@@ -32,12 +33,22 @@ const PCBuilder = () => {
 
     const [alert, setAlert] = useState(null); // typ { type, title, message }
     const [activeAddType, setActiveAddType] = useState(null);
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [pcToDelete, setPcToDelete] = useState(null);
+    const [expandedPCs, setExpandedPCs] = useState([]);
+
     const navigate = useNavigate();
 
     useEffect(() => {
         fetchPCs();
         fetchComponents();
     }, []);
+
+    const togglePCSection = (id) => {
+        setExpandedPCs(prev =>
+            prev.includes(id) ? prev.filter(pid => pid !== id) : [...prev, id]
+        );
+    };
 
     const fetchPCs = async () => {
         const token = localStorage.getItem("accessToken");
@@ -189,6 +200,14 @@ const PCBuilder = () => {
         }
     };
 
+    const confirmDeletePC = async () => {
+        if (pcToDelete) {
+            await handleDeletePC(pcToDelete.id);
+            setPcToDelete(null);
+            setShowConfirm(false);
+        }
+    };
+
     // Filtrera pågående vs sålda
     const filtered = pcs.filter((pc) =>
         activeTab === "ongoing" ? !pc.isSold : pc.isSold
@@ -248,8 +267,9 @@ const PCBuilder = () => {
                     + Skapa nytt bygge
                 </button>
             </div>
+
             {/* --- Kort­grid --- */}
-            <div className="flex flex-col items-center gap-8">
+            <div className="flex flex-col items-center">
                 {filtered.length > 0 ? (
                     filtered.map((pc) => {
                         const cost = pc.componentsTotalCost || 0;
@@ -259,7 +279,6 @@ const PCBuilder = () => {
 
                         return (
                             <div key={pc.id} className="relative bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-5xl mx-auto mb-6">
-
                                 {/* Header */}
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-3">
@@ -271,7 +290,16 @@ const PCBuilder = () => {
                                         </h2>
                                     </div>
                                     <div className="flex items-center space-x-2">
-                                        {/* Checkbox */}
+                                        {/* Expand/collapse */}
+                                        <button
+                                            onClick={() => togglePCSection(pc.id)}
+                                            className="text-lg text-blue-600 hover:text-blue-800"
+                                            title="Visa mer/mindre"
+                                        >
+                                            {expandedPCs.includes(pc.id) ? "▲" : "▼"}
+                                        </button>
+
+                                        {/* Såld-checkbox */}
                                         <label className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                                             <input
                                                 type="checkbox"
@@ -282,9 +310,12 @@ const PCBuilder = () => {
                                             Såld
                                         </label>
 
-                                        {/* Delete button */}
+                                        {/* Delete */}
                                         <button
-                                            onClick={() => handleDeletePC(pc.id)}
+                                            onClick={() => {
+                                                setPcToDelete(pc);
+                                                setShowConfirm(true);
+                                            }}
                                             title="Ta bort bygget"
                                             className="text-gray-400 hover:text-red-500 text-xl"
                                         >
@@ -293,98 +324,92 @@ const PCBuilder = () => {
                                     </div>
                                 </div>
 
-                                {/* Divider line */}
-                                <hr className="my-4 border-t border-gray-300 dark:border-gray-600" />
+                                {expandedPCs.includes(pc.id) && (
+                                    <>
+                                        <hr className="my-4 border-t border-gray-300 dark:border-gray-600" />
 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-
-                                    <div className="flex flex-col items-center justify-center py-2 text-center text-gray-600 dark:text-gray-300 text-sm">
-                                        {pc.imageURL ? (
-                                            <img
-                                                src={pc.imageURL}
-                                                alt="PC bild"
-                                                className="h-48 object-contain mb-2 border border-gray-400 dark:border-gray-600"
-                                            />
-                                        ) : (
-                                            <div className="h-48 w-full bg-gray-300 dark:bg-gray-600 mb-2 flex items-center justify-center text-gray-500 dark:text-gray-200 border border-gray-400 dark:border-gray-600">
-                                                Ingen bild
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                            {/* Bild */}
+                                            <div className="flex flex-col items-center justify-center py-2 text-center text-gray-600 dark:text-gray-300 text-sm">
+                                                {pc.imageURL ? (
+                                                    <img
+                                                        src={pc.imageURL}
+                                                        alt="PC bild"
+                                                        className="h-48 object-contain mb-2 border border-gray-400 dark:border-gray-600"
+                                                    />
+                                                ) : (
+                                                    <div className="h-48 w-full bg-gray-300 dark:bg-gray-600 mb-2 flex items-center justify-center text-gray-500 dark:text-gray-200 border border-gray-400 dark:border-gray-600">
+                                                        Ingen bild
+                                                    </div>
+                                                )}
+                                                <ImageUploader onUpload={(url) => handleImageUpload(url, pc)} />
                                             </div>
-                                        )}
-                                        <ImageUploader onUpload={(url) => handleImageUpload(url, pc)} />
-                                    </div>
 
-                                    {/* Komponentlista */}
-                                    <div className="flex flex-col items-center text-center">
-                                        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Specifikationer</h3>
-                                        {Object.values(ComponentTypeEnum).map((type) => {
-                                            const existingComponent = pc.components.find((c) => c.type === type);
-                                            return (
-                                                <div key={type} className="flex items-center justify-between w-full px-4 py-1">
-                                                    <span className="text-sm text-gray-800 dark:text-gray-200">
-                                                        <strong>{type}:</strong> {existingComponent ? existingComponent.name : <em>Inget valt</em>}
-                                                    </span>
-                                                    {existingComponent ? (
-                                                        <button
-                                                            onClick={() => handleRemoveComponent(existingComponent.id)}
-                                                            className="ml-2 text-xs text-red-500 hover:text-red-700"
-                                                        >
-                                                            Ta bort
-                                                        </button>
-                                                    ) : (
-                                                            <button
-                                                                onClick={() => {
-                                                                    setCurrentPC(pc);
-                                                                    setActiveAddType(type); // t.ex. "GPU"
-                                                                    setShowAddCompModal(true);
-                                                                }}
-                                                                className="ml-2 text-xs text-blue-500 hover:text-blue-700"
-                                                            >
-                                                                Lägg till
-                                                            </button>
+                                            {/* Specifikationer */}
+                                            <div className="flex flex-col items-center text-center">
+                                                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Specifikationer</h3>
+                                                {Object.values(ComponentTypeEnum).map((type) => {
+                                                    const existingComponent = pc.components.find((c) => c.type === type);
+                                                    return (
+                                                        <div key={type} className="flex items-center justify-between w-full px-4 py-1">
+                                                            <span className="text-sm text-gray-800 dark:text-gray-200">
+                                                                <strong>{type}:</strong> {existingComponent ? existingComponent.name : <em>Inget valt</em>}
+                                                            </span>
+                                                            {existingComponent ? (
+                                                                <button
+                                                                    onClick={() => handleRemoveComponent(existingComponent.id)}
+                                                                    className="ml-2 text-xs text-red-500 hover:text-red-700"
+                                                                >
+                                                                    Ta bort
+                                                                </button>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setCurrentPC(pc);
+                                                                        setActiveAddType(type);
+                                                                        setShowAddCompModal(true);
+                                                                    }}
+                                                                    className="ml-2 text-xs text-blue-500 hover:text-blue-700"
+                                                                >
+                                                                    Lägg till
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
 
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
+                                            {/* Prisinfo */}
+                                            <div className="text-center flex flex-col items-center">
+                                                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Prisinformation</h3>
+                                                <p className="text-sm text-gray-800 dark:text-gray-100">Total kostnad: <strong>{cost} kr</strong></p>
+                                                <p className="text-sm text-gray-800 dark:text-gray-100">Säljpris: <strong>{price} kr</strong></p>
+                                                <p className={`text-sm font-semibold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                    Vinst: {profit} kr ({profitPct}%)
+                                                </p>
+                                                <button className="mt-3 px-3 py-1 bg-gray-300 dark:bg-gray-600 text-sm rounded hover:bg-gray-400 dark:hover:bg-gray-500">
+                                                    Lägg till moms
+                                                </button>
+                                            </div>
+                                        </div>
 
-                                    {/* Prisinfo */}
-                                    <div className="text-center flex flex-col items-center">
-                                        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                            Prisinformation
-                                        </h3>
-                                        <p className="text-sm text-gray-800 dark:text-gray-100">
-                                            Total kostnad: <strong>{cost} kr</strong>
-                                        </p>
-                                        <p className="text-sm text-gray-800 dark:text-gray-100">
-                                            Säljpris: <strong>{price} kr</strong>
-                                        </p>
-                                        <p className={`text-sm font-semibold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                            Vinst: {profit} kr ({profitPct}%)
-                                        </p>
-                                        <button className="mt-3 px-3 py-1 bg-gray-300 dark:bg-gray-600 text-sm rounded hover:bg-gray-400 dark:hover:bg-gray-500">
-                                            Lägg till moms
-                                        </button>
-                                    </div>
-                                </div>                                
-
-                                {/* Actionknappar */}
-                                <div className="flex justify-center flex-wrap gap-2 mt-4">
-                                    <button
-                                        className="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl font-medium rounded-lg text-sm px-5 py-2.5"
-                                        onClick={() => {
-                                            setCurrentPC(pc);
-                                            setPcName(pc.name);
-                                            setPcDescription(pc.description || "");
-                                            setPcPrice(pc.price || "");
-                                            setPcImageURL(pc.imageURL || "");
-                                            setShowEditModal(true);
-                                        }}
-                                    >
-                                        Redigera Info
-                                    </button>                                                                     
-                                </div>
+                                        <div className="flex justify-center flex-wrap gap-2 mt-4">
+                                            <button
+                                                className="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl font-medium rounded-lg text-sm px-5 py-2.5"
+                                                onClick={() => {
+                                                    setCurrentPC(pc);
+                                                    setPcName(pc.name);
+                                                    setPcDescription(pc.description || "");
+                                                    setPcPrice(pc.price || "");
+                                                    setPcImageURL(pc.imageURL || "");
+                                                    setShowEditModal(true);
+                                                }}
+                                            >
+                                                Redigera Info
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         );
                     })
@@ -606,9 +631,15 @@ const PCBuilder = () => {
                                 Stäng
                             </button>
                         </div>
-                    </div>
+                    </div>                    
                 </div>
             )}
+            <ConfirmDeleteModal
+                isOpen={showConfirm}
+                onClose={() => setShowConfirm(false)}
+                onConfirm={confirmDeletePC}
+                message={`Vill du verkligen radera bygget "${pcToDelete?.name}"?`}
+            />
         </div>
     );
 };
