@@ -8,7 +8,6 @@ namespace FlipYourPC.Models
         public required string Name { get; set; }
         public required int Price { get; set; }
         public required string Manufacturer { get; set; }
-        public required int TotalStock { get; set; }
         public ComponentType Type { get; set; }
         [JsonIgnore]
         public Guid? PCId { get; set; } // Foreign key to the PC table

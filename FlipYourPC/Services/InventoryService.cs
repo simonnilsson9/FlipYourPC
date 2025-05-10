@@ -59,7 +59,7 @@ namespace FlipYourPC.Services
                 await _appDbContext.SaveChangesAsync();
             }   
 
-            inventory.TotalValue = inventory.Components.Sum(c => c.Price * c.TotalStock);
+            inventory.TotalValue = inventory.Components.Sum(c => c.Price);
             return inventory;
         }
 
@@ -75,7 +75,7 @@ namespace FlipYourPC.Services
                 if (component != null)
                 {
                     inventory.Components.Remove(component);
-                    inventory.TotalValue -= component.Price * component.TotalStock;
+                    inventory.TotalValue -= component.Price;
                     await _appDbContext.SaveChangesAsync();
                 }
             }

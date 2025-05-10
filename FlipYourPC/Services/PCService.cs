@@ -85,7 +85,8 @@ namespace FlipYourPC.Services
             {
                 Name = pcDTO.Name,
                 UserId = userId, //Koppla till den inloggade användaren
-                Components = new List<Component>()
+                Components = new List<Component>(),
+                ListedAt = DateTime.UtcNow
             };                       
 
             await _appDbContext.PCs.AddAsync(pc);

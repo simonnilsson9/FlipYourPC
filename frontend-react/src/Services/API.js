@@ -91,7 +91,7 @@ export const updatePC = async (pcId, pcData, token) => {
             },
             body: JSON.stringify(pcData), 
         });
-
+       
         if (response.ok) {
             return await response.json(); 
         } else {

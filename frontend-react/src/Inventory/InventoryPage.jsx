@@ -51,7 +51,7 @@ const InventoryPage = () => {
             } else {
                 setComponents(data.components);
                 const value = data.components.reduce(
-                    (acc, c) => acc + c.price * c.totalStock,
+                    (acc, c) => acc + c.price,
                     0
                 );
                 setTotalValue(value);
@@ -67,7 +67,6 @@ const InventoryPage = () => {
             name: "",
             price: 0,
             manufacturer: "",
-            totalStock: 1,
             type: ""
         });
         setShowModal(true);
@@ -84,8 +83,8 @@ const InventoryPage = () => {
     };
 
     const handleSave = async () => {
-        const { name, price, manufacturer, totalStock, type } = currentComponent;
-        if (!name || !price || !manufacturer || !totalStock || !type) {
+        const { name, price, manufacturer, type } = currentComponent;
+        if (!name || !price || !manufacturer || !type) {
             alert("Fyll i alla fält");
             return;
         }
@@ -93,7 +92,6 @@ const InventoryPage = () => {
         await saveComponent({
             ...currentComponent,
             price: parseInt(price),
-            totalStock: parseInt(totalStock),
         });
 
         setShowModal(false);
@@ -187,9 +185,8 @@ const InventoryPage = () => {
                                         <tr key={comp.id} className="text-gray-800 dark:text-gray-200">
                                             <td className="py-2">{comp.name}</td>
                                             <td>{comp.manufacturer}</td>
-                                            <td>{comp.totalStock}</td>
                                             <td>{comp.price} kr</td>
-                                            <td>{comp.price * comp.totalStock} kr</td>
+                                            <td>{comp.price} kr</td>
                                             <td className="space-x-2">
                                                 <button
                                                     onClick={() => handleEditComponent(comp)}
@@ -248,18 +245,7 @@ const InventoryPage = () => {
                                 onChange={(e) => setCurrentComponent({ ...currentComponent, price: e.target.value })}
                                 className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
                             />
-                        </div>
-
-                        {/* Antal */}
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Antal i lager</label>
-                            <input
-                                type="number"
-                                value={currentComponent?.totalStock || ""}
-                                onChange={(e) => setCurrentComponent({ ...currentComponent, totalStock: e.target.value })}
-                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
-                            />
-                        </div>
+                        </div>                        
 
                         {/* Typ */}
                         <div className="mb-6">
