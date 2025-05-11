@@ -99,8 +99,10 @@ const Header = () => {
 
                 <div
                     id="navbar-cta"
-                    className={`w-full overflow-hidden transition-all duration-300 ease-in-out md:flex md:w-auto md:order-1 ${isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                        }`}
+                    className={`w-full overflow-hidden transition-all duration-300 ease-in-out md:flex md:w-auto md:order-1
+                        ${isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}
+                        md:max-h-full md:opacity-100
+                    `}
                 >
                     <ul className="flex flex-col items center font-medium p-4 md:p-0 mt-4 border border-gray-700 rounded-lg bg-gray-800 md:flex-row md:space-x-8 md:mt-0 md:border-0 md:bg-gray-800 text-white text-center">
                         <li><Link to="/" onClick={() => setIsMenuOpen(false)} className={linkClass('/')}>Dashboard</Link></li>

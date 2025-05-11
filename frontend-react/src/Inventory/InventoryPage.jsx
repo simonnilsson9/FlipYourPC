@@ -141,7 +141,7 @@ const InventoryPage = () => {
                     />
                     <button
                         onClick={handleAddComponent}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl text-white rounded-lg hover:bg-blue-700"
                     >
                         + Lägg till komponent
                     </button>

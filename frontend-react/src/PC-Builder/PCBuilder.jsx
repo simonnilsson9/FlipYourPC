@@ -145,12 +145,12 @@ const PCBuilder = () => {
         }
     };
 
-    const handleRemoveComponent = async (compId) => {
+    const handleRemoveComponent = async (pc, compId) => {
         const token = localStorage.getItem("accessToken");
-        if (!token || !currentPC) return;
+        if (!token) return;
+
         try {
-            await removeComponentFromPC(currentPC.id, compId, token);
-            setCurrentComponents((prev) => prev.filter((c) => c.id !== compId));
+            await removeComponentFromPC(pc.id, compId, token);
             fetchPCs();
             fetchComponents();
             showAlert("success", "Borttagen", "Komponenten blev borttagen.");
@@ -362,7 +362,7 @@ const PCBuilder = () => {
                                                             </span>
                                                             {existingComponent ? (
                                                                 <button
-                                                                    onClick={() => handleRemoveComponent(existingComponent.id)}
+                                                                    onClick={() => handleRemoveComponent(pc, existingComponent.id)}
                                                                     className="ml-2 text-xs text-red-500 hover:text-red-700"
                                                                 >
                                                                     Ta bort
