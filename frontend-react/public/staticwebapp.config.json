@@ -1,0 +1,28 @@
+﻿{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [ "/images/*", "/css/*", "/js/*" ]
+  },
+  "routes": [
+    {
+      "route": "/",
+      "rewrite": "/index.html"
+    },
+    {
+      "route": "/lager",
+      "rewrite": "/index.html"
+    },
+    {
+      "route": "/pc-byggare",
+      "rewrite": "/index.html"
+    },
+    {
+      "route": "/logga-in",
+      "rewrite": "/index.html"
+    },
+    {
+      "route": "/registrera",
+      "rewrite": "/index.html"
+    }
+  ]  
+}

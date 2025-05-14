@@ -126,19 +126,6 @@ const InventoryPage = () => {
         );
     };
 
-    if (!token) {
-        return (
-            <div className="p-6 text-center">
-                <p className="text-gray-700 dark:text-white mb-2">
-                    Du måste vara inloggad för att se lagret.
-                </p>
-                <Link to="/logga-in" className="text-blue-600 hover:underline">
-                    Gå till inloggning
-                </Link>
-            </div>
-        );
-    }
-
     return (
         <div className="max-w-6xl mx-auto px-4 py-8 mt-8">           
             <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-4 mb-6">
@@ -309,7 +296,7 @@ const InventoryPage = () => {
                     message={alert.message}
                     onClose={() => setAlert(null)}
                 />
-            )}
+            )}            
         </div>
     );
 };

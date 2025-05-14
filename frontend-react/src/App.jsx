@@ -8,23 +8,53 @@ import Register from './Login/Register';
 import Login from './Login/Login';
 import PCBuilder from './PC-Builder/PCBuilder';
 import MyPage from './MyPages/MyPage';
+import ProtectedRoute from './Components/ProtectedRoute';
 
 function App() {
-  return (
-    <>
-          <Router>
-              <Header />
-              <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/lager" element={<InventoryPage />} />
-                  <Route path="/registrera" element={<Register />} />
-                  <Route path="/logga-in" element={<Login />} />
-                  <Route path="/pc-byggare" element={<PCBuilder />} />
-                  <Route path="/mina-sidor" element={<MyPage />} />
-              </Routes>
-          </Router>
-    </>
-  )
+    return (
+        <Router>
+            <Header />
+            <Routes>
+                {/* Offentliga routes */}
+                <Route path="/logga-in" element={<Login />} />
+                <Route path="/registrera" element={<Register />} />
+
+                {/* Skyddade routes */}
+                <Route
+                    path="/"
+                    element={
+                        <ProtectedRoute>
+                            <Dashboard />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/lager"
+                    element={
+                        <ProtectedRoute>
+                            <InventoryPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/pc-byggare"
+                    element={
+                        <ProtectedRoute>
+                            <PCBuilder />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/mina-sidor"
+                    element={
+                        <ProtectedRoute>
+                            <MyPage />
+                        </ProtectedRoute>
+                    }
+                />
+            </Routes>
+        </Router>
+    );
 }
 
-export default App
+export default App;
