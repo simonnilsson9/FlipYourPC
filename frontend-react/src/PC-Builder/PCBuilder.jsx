@@ -646,9 +646,12 @@ const PCBuilder = () => {
                                             key={c.id}
                                             className="flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-3 rounded"
                                         >
-                                            <span className="text-sm text-gray-900 dark:text-white">
-                                                <strong>{ComponentTypeTranslations[c.type] || c.type}</strong>: {c.name} — {c.manufacturer}
-                                            </span>
+                                            <div className="flex flex-col text-sm text-gray-900 dark:text-white">
+                                                <span className="font-semibold">{c.name}</span>
+                                                <span className="text-xs text-gray-600 dark:text-gray-300">
+                                                    {c.manufacturer} — {c.price.toLocaleString()} kr
+                                                </span>
+                                            </div>
                                             <button
                                                 onClick={() => handleAddComponent(c.id)}
                                                 className="text-sm text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 cursor-pointer"

@@ -71,6 +71,7 @@ const InventoryPage = () => {
             name: "",
             price: 0,
             manufacturer: "",
+            store:"",
             type: ""
         });
         setShowModal(true);
@@ -183,12 +184,14 @@ const InventoryPage = () => {
 
                         <div className={`px-4 overflow-hidden transition-all duration-500 ease-in-out ${openSections.includes(type) ? 'max-h-[1000px] pb-4' : 'max-h-0'}`}>
                             {openSections.includes(type) && (
-                                <table className="w-full text-sm text-left mt-2">
+                                <table className="w-full text-sm text-left mt-2 table-fixed">
                                     <thead>
                                         <tr className="border-b border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400">
-                                            <th className="py-2">Namn</th>
-                                            <th>Tillverkare</th>
-                                            <th>Värde</th>
+                                            <th className="py-2 w-1/4">Namn</th>
+                                            <th className="w-1/5">Tillverkare</th>
+                                            <th className="w-1/5">Värde</th>
+                                            <th className="w-1/5">Butik</th>
+                                            <th className="w-1/20">Åtgärder</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -197,6 +200,7 @@ const InventoryPage = () => {
                                                 <td className="py-2">{comp.name}</td>
                                                 <td>{comp.manufacturer}</td>
                                                 <td>{comp.price} kr</td>
+                                                <td>{comp.store || "-"}</td>
                                                 <td className="space-x-2">
                                                     <button
                                                         onClick={() => handleEditComponent(comp)}
@@ -230,6 +234,23 @@ const InventoryPage = () => {
                             {currentComponent?.id ? "Redigera komponent" : "Lägg till komponent"}
                         </h2>
 
+                        {/* Typ */}
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Typ av komponent</label>
+                            <select
+                                value={currentComponent?.type || ""}
+                                onChange={(e) => setCurrentComponent({ ...currentComponent, type: e.target.value })}
+                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
+                            >
+                                <option value="">Välj typ</option>
+                                {Object.values(ComponentTypeEnum).map((type) => (
+                                    <option key={type} value={type}>
+                                        {ComponentTypeTranslations[type] || type}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
                         {/* Namn */}
                         <div className="mb-4">
                             <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Namn</label>
@@ -261,24 +282,18 @@ const InventoryPage = () => {
                                 onChange={(e) => setCurrentComponent({ ...currentComponent, price: e.target.value })}
                                 className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
                             />
-                        </div>                        
-
-                        {/* Typ */}
-                        <div className="mb-6">
-                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Typ av komponent</label>
-                            <select
-                                value={currentComponent?.type || ""}
-                                onChange={(e) => setCurrentComponent({ ...currentComponent, type: e.target.value })}
-                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
-                            >
-                                <option value="">Välj typ</option>
-                                {Object.values(ComponentTypeEnum).map((type) => (
-                                    <option key={type} value={type}>
-                                        {ComponentTypeTranslations[type] || type}
-                                    </option>
-                                ))}
-                            </select>
                         </div>
+
+                        {/* Butik */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Butik</label>
+                            <input
+                                type="text"
+                                value={currentComponent?.store || ""}
+                                onChange={(e) => setCurrentComponent({ ...currentComponent, store: e.target.value })}
+                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
+                            />
+                        </div>                        
 
                         {/* Actionknappar */}
                         <div className="flex justify-end space-x-2">
