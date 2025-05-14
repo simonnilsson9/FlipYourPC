@@ -6,7 +6,7 @@
     RAM: "RAM",
     SSD: "SSD",
     Case: "Case",
-    CPUCooler: "CPU-Cooler",
+    CPUCooler: "CPUCooler",
     Other: "Other",
 };
 

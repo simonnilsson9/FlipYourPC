@@ -6,5 +6,6 @@
         public int Price { get; set; }
         public string Manufacturer { get; set; }
         public ComponentType Type { get; set; }
+        public string Store { get; set; }
     }
 }

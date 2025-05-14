@@ -1,5 +1,5 @@
 ﻿import { fetchInventory, getAllPCs } from "./API";
-import { format, subMonths, isAfter } from 'date-fns';
+import { format } from 'date-fns';
 
 export const fetchDashboardStats = async () => {
     const tokenValue = localStorage.getItem("accessToken");
@@ -9,18 +9,15 @@ export const fetchDashboardStats = async () => {
         getAllPCs(tokenValue),
     ]);
 
-    // Alla sålda PCs (för total statistik)
+    // Alla sålda PCs
     const soldPCsAll = pcsData.filter(pc => pc.isSold);
-
-    // Endast senaste 6 månader (för grafer)
-    const cutoffDate = subMonths(new Date(), 5);
-    const soldPCsLast6Months = soldPCsAll.filter(pc => pc.soldAt && isAfter(new Date(pc.soldAt), cutoffDate));
 
     const salesByMonth = {};
     const profitByMonth = {};
     const soldComputersByMonth = {};
 
-    soldPCsLast6Months.forEach(pc => {
+    soldPCsAll.forEach(pc => {
+        if (!pc.soldAt) return;
         const soldDate = new Date(pc.soldAt);
         const monthKey = format(soldDate, 'yyyy-MM');
 
@@ -43,7 +40,6 @@ export const fetchDashboardStats = async () => {
         : 0;
 
     return {
-        // Obegränsad statistik
         inventoryValue: inventoryData.components.reduce((acc, c) => acc + c.price, 0),
         componentCount: inventoryData.components.length,
         totalSales,
@@ -51,9 +47,10 @@ export const fetchDashboardStats = async () => {
         totalProfit,
         avgSalesCycle: avgSalesCycleDays,
 
-        // Grafer (endast senaste 6 månader)
         salesByMonth,
         profitByMonth,
         soldComputersByMonth,
+
+        allSoldPCs: soldPCsAll,
     };
 };

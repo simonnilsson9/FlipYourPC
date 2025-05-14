@@ -127,7 +127,15 @@ const InventoryPage = () => {
     };
 
     return (
-        <div className="max-w-6xl mx-auto px-4 py-8 mt-8">           
+        <div className="max-w-6xl mx-auto px-4 py-8">  
+            <div className="max-w-5xl mx-auto text-center mb-8">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                    Lager
+                </h1>
+                <p className="text-gray-600 dark:text-gray-300">
+                    Här kan du hantera alla komponenter i ditt lager.
+                </p>
+            </div>
             <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-4 mb-6">
                 <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-800">
                     <div className="flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-300">
@@ -156,56 +164,62 @@ const InventoryPage = () => {
             </div>
 
 
-            {Object.entries(groupedComponents).map(([type, comps]) => (
-                <div key={type} className="w-full bg-white dark:bg-gray-800 rounded-xl shadow-md mb-4 overflow-hidden">
-                    <button
-                        className="w-full flex justify-between items-center p-4 text-left text-gray-800 dark:text-white font-semibold text-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer"
-                        onClick={() => toggleSection(type)}
-                    >
-                        <span>{ComponentTypeTranslations[type] || type}</span>
-                        <ChevronDownIcon
-                            className={`w-5 h-5 text-gray-500 dark:text-gray-300 transform transition-transform duration-300 ${openSections.includes(type) ? 'rotate-180' : 'rotate-0'}`}
-                        />
-                    </button>
-
-                    <div className={`px-4 overflow-hidden transition-all duration-500 ease-in-out ${openSections.includes(type) ? 'max-h-[1000px] pb-4' : 'max-h-0'}`}>
-                        {openSections.includes(type) && (
-                            <table className="w-full text-sm text-left mt-2">
-                                <thead>
-                                    <tr className="border-b border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400">
-                                        <th className="py-2">Namn</th>
-                                        <th>Tillverkare</th>
-                                        <th>Värde</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {comps.map((comp) => (
-                                        <tr key={comp.id} className="text-gray-800 dark:text-gray-200">
-                                            <td className="py-2">{comp.name}</td>
-                                            <td>{comp.manufacturer}</td>
-                                            <td>{comp.price} kr</td>
-                                            <td className="space-x-2">
-                                                <button
-                                                    onClick={() => handleEditComponent(comp)}
-                                                    className="text-white-500 hover:text-gray-500 cursor-pointer"
-                                                >
-                                                    <PencilSquareIcon className="w-5 h-5 inline" />
-                                                </button>
-                                                <button
-                                                    onClick={() => requestDelete(comp.id)}
-                                                    className="text-red-500 hover:text-red-700 cursor-pointer"
-                                                >
-                                                    <TrashIcon className="w-5 h-5 inline" />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
-                    </div>
+            {components.length === 0 ? (
+                <div className="text-center py-16 text-gray-500 dark:text-gray-400 italic">
+                    Inga komponenter att visa.
                 </div>
-            ))}
+            ) : (
+                Object.entries(groupedComponents).map(([type, comps]) => (
+                    <div key={type} className="w-full bg-white dark:bg-gray-800 rounded-xl shadow-md mb-4 overflow-hidden">
+                        <button
+                            className="w-full flex justify-between items-center p-4 text-left text-gray-800 dark:text-white font-semibold text-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer"
+                            onClick={() => toggleSection(type)}
+                        >
+                            <span>{ComponentTypeTranslations[type] || type}</span>
+                            <ChevronDownIcon
+                                className={`w-5 h-5 text-gray-500 dark:text-gray-300 transform transition-transform duration-300 ${openSections.includes(type) ? 'rotate-180' : 'rotate-0'}`}
+                            />
+                        </button>
+
+                        <div className={`px-4 overflow-hidden transition-all duration-500 ease-in-out ${openSections.includes(type) ? 'max-h-[1000px] pb-4' : 'max-h-0'}`}>
+                            {openSections.includes(type) && (
+                                <table className="w-full text-sm text-left mt-2">
+                                    <thead>
+                                        <tr className="border-b border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400">
+                                            <th className="py-2">Namn</th>
+                                            <th>Tillverkare</th>
+                                            <th>Värde</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {comps.map((comp) => (
+                                            <tr key={comp.id} className="text-gray-800 dark:text-gray-200">
+                                                <td className="py-2">{comp.name}</td>
+                                                <td>{comp.manufacturer}</td>
+                                                <td>{comp.price} kr</td>
+                                                <td className="space-x-2">
+                                                    <button
+                                                        onClick={() => handleEditComponent(comp)}
+                                                        className="text-white-500 hover:text-gray-500 cursor-pointer"
+                                                    >
+                                                        <PencilSquareIcon className="w-5 h-5 inline" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => requestDelete(comp.id)}
+                                                        className="text-red-500 hover:text-red-700 cursor-pointer"
+                                                    >
+                                                        <TrashIcon className="w-5 h-5 inline" />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    </div>
+                ))
+            )}
 
 
             {/* Modal */}
