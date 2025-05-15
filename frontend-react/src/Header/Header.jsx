@@ -1,6 +1,6 @@
 ﻿import React, { useEffect, useState, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { UserCircleIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import { UserCircleIcon, ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import ThemeToggle from '../Components/ThemeToggle';
 import { fetchMyUser } from '../services/API';
 import { jwtDecode } from 'jwt-decode';
@@ -42,7 +42,7 @@ const Header = () => {
     }, []);
 
     const linkClass = (path) =>
-        `block py-2 px-3 md:p-0 rounded ${location.pathname === path
+        `block py-2 px-3 rounded text-center ${location.pathname === path
             ? 'text-blue-400 font-semibold'
             : 'text-white hover:text-blue-300'
         }`;
@@ -54,7 +54,7 @@ const Header = () => {
     };
 
     return (
-        <nav className="bg-gray-800 border-b border-gray-700 text-white">
+        <nav className="bg-gray-800 border-b border-gray-700 text-white relative">
             <div className="max-w-screen-xl flex items-center justify-between mx-auto p-2 md:p-4 relative">
                 <Link to="/" className="flex items-center space-x-2">
                     <img src="https://flowbite.com/docs/images/logo.svg" className="h-6 md:h-8" alt="Logo" />
@@ -106,22 +106,36 @@ const Header = () => {
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
                         type="button"
-                        className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-white rounded-lg md:hidden hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                        className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-white rounded-lg md:hidden hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition"
                     >
-                        <span className="sr-only">Öppna meny</span>
-                        <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
-                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1h15M1 7h15M1 13h15" />
-                        </svg>
+                        {isMenuOpen ? (
+                            <XMarkIcon className="w-6 h-6" />
+                        ) : (
+                            <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
+                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1h15M1 7h15M1 13h15" />
+                            </svg>
+                        )}
                     </button>
                 </div>
 
                 <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
-                    <ul className="flex space-x-8 font-medium">
+                    <ul className="flex space-x-4 font-medium">
                         <li><Link to="/" className={linkClass('/')}>Dashboard</Link></li>
                         <li><Link to="/lager" className={linkClass('/lager')}>Lager</Link></li>
                         <li><Link to="/pc-byggare" className={linkClass('/pc-byggare')}>PC-Byggare</Link></li>
                     </ul>
                 </div>
+            </div>
+
+            {/* Animated Mobile menu */}
+            <div
+                className={`md:hidden bg-gray-800 border-t border-gray-700 overflow-hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}
+            >
+                <ul className="flex flex-col p-4 space-y-2 font-medium text-center">
+                    <li><Link to="/" onClick={() => setIsMenuOpen(false)} className={linkClass('/')}>Dashboard</Link></li>
+                    <li><Link to="/lager" onClick={() => setIsMenuOpen(false)} className={linkClass('/lager')}>Lager</Link></li>
+                    <li><Link to="/pc-byggare" onClick={() => setIsMenuOpen(false)} className={linkClass('/pc-byggare')}>PC-Byggare</Link></li>
+                </ul>
             </div>
         </nav>
     );
