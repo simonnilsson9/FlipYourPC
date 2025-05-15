@@ -8,6 +8,7 @@ import Register from './Login/Register';
 import Login from './Login/Login';
 import PCBuilder from './PC-Builder/PCBuilder';
 import MyPage from './MyPages/MyPage';
+import AdminPage from './Admin/AdminPage';  // ⬅ Lägg till denna
 import ProtectedRoute from './Components/ProtectedRoute';
 
 function App() {
@@ -49,6 +50,14 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <MyPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin"
+                    element={
+                        <ProtectedRoute>
+                            <AdminPage />
                         </ProtectedRoute>
                     }
                 />

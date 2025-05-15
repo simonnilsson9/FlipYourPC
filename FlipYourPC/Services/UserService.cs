@@ -98,5 +98,27 @@ namespace FlipYourPC.Services
             _appDbContext.Users.Update(user);
             await _appDbContext.SaveChangesAsync();
         }
+
+        public async Task UpdateUserRole(UserUpdateRoleDTO dto)
+        {
+            var currentUserId = GetCurrentUserId();
+
+            var userToUpdateRole = await _appDbContext.Users
+                .FirstOrDefaultAsync(u => u.Id == currentUserId);
+
+            if (userToUpdateRole == null)
+            {
+                throw new ArgumentException("User not found.");
+            }
+
+            if(dto.NewRole != "Admin" && dto.NewRole != "Användare")
+            {
+                throw new Exception("Invalid role");
+            }
+
+            userToUpdateRole.Role = dto.NewRole;
+            _appDbContext.Users.Update(userToUpdateRole);
+            await _appDbContext.SaveChangesAsync();
+        }
     }
 }

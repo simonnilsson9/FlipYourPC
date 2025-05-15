@@ -11,5 +11,6 @@ namespace FlipYourPC.Services.Interfaces
         Task DeleteUser(User user);
         Guid GetCurrentUserId();
         Task ChangePasswordAsync(ChangePasswordDTO dto);
+        Task UpdateUserRole(UserUpdateRoleDTO dto);
     }
 }

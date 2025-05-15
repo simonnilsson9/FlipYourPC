@@ -106,5 +106,21 @@ namespace FlipYourPC.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("update-role")]
+        public async Task<IActionResult> UpdateUserRole([FromBody] UserUpdateRoleDTO dto)
+        {
+            try
+            {
+                await _userService.UpdateUserRole(dto);
+                return Ok("User role updated successfully");
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(new { error = ex.Message });
+            }
+        }
     }
 }
