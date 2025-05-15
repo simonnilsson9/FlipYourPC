@@ -325,23 +325,22 @@ export const deleteUser = async (userId) => {
     return true;
 };
 
-export const updateUserAsAdmin = async (userId, updatedData) => {
-    const token = localStorage.getItem('accessToken');
-    const response = await fetch(`${API_URL}/users/update-as-admin/${userId}`, {
+export const updateUserAsAdmin = async (userId, userData) => {
+    const response = await fetch(`${API_URL}/users/admin-update-user/${userId}`, {
         method: "PUT",
         headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
+            "Authorization": `Bearer ${token()}`,
+            "Content-Type": "application/json"
         },
-        body: JSON.stringify(updatedData)
+        body: JSON.stringify(userData)
     });
 
     if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Fel vid uppdatering av användare");
+        const data = await response.text();
+        throw new Error(data || "Kunde inte uppdatera användaren");
     }
 
-    return await response.json();
+    return true;
 };
 
 export const changePasswordAsAdmin = async (data) => {

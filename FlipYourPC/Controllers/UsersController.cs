@@ -124,13 +124,13 @@ namespace FlipYourPC.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpDelete("delete-user")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser([FromBody] Guid id)
         {
             try
             {
                 var user = await _userService.GetUserByIdAsync(id);
-                if(user == null)
+                if (user == null)
                 {
                     return NotFound("User not found");
                 }
