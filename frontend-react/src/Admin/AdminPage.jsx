@@ -38,16 +38,18 @@ const AdminPage = () => {
 
     const handleRoleChange = async (userId, newRole) => {
         try {
-            await updateUserRole(userId, newRole);
-            setUsers((prev) =>
-                prev.map((user) =>
+            await updateUserRole({ userId: userId, newRole: newRole });
+            alert("Roll uppdaterad");
+
+            // Uppdatera lokala state direkt utan refetch
+            setUsers(prevUsers =>
+                prevUsers.map(user =>
                     user.id === userId ? { ...user, role: newRole } : user
                 )
             );
-            alert('Roll uppdaterad');
         } catch (err) {
-            console.error('Kunde inte uppdatera roll:', err);
-            alert('Fel: ' + err.message);
+            console.error("Kunde inte uppdatera roll:", err);
+            alert("Kunde inte uppdatera roll: " + err.message);
         }
     };
 

@@ -101,10 +101,8 @@ namespace FlipYourPC.Services
 
         public async Task UpdateUserRole(UserUpdateRoleDTO dto)
         {
-            var currentUserId = GetCurrentUserId();
-
             var userToUpdateRole = await _appDbContext.Users
-                .FirstOrDefaultAsync(u => u.Id == currentUserId);
+            .FirstOrDefaultAsync(u => u.Id == dto.UserId);
 
             if (userToUpdateRole == null)
             {
