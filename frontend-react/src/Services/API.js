@@ -290,3 +290,28 @@ export const changePassword = async (passwordData) => {
         throw error;
     }
 };
+
+export const updateUserRole = async (userId, role) => {
+    try {
+        const response = await fetch(`${API_URL}/users/update-role`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token()}`
+            },
+            body: JSON.stringify({
+                userId,
+                role
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "Error updating user role");
+        }
+
+        return await response.text();
+    } catch (error) {
+        throw error;
+    }
+};

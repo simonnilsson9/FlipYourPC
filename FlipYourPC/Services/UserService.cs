@@ -111,7 +111,7 @@ namespace FlipYourPC.Services
                 throw new ArgumentException("User not found.");
             }
 
-            if(dto.NewRole != "Admin" && dto.NewRole != "Användare")
+            if(dto.NewRole != UserRoles.Admin && dto.NewRole != UserRoles.User)
             {
                 throw new Exception("Invalid role");
             }

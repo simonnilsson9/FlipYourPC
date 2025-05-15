@@ -1,7 +1,7 @@
 ﻿import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { getAllUsers } from '../services/API';
+import { getAllUsers, updateUserRole } from '../services/API';
 
 const AdminPage = () => {
     const navigate = useNavigate();
@@ -13,8 +13,6 @@ const AdminPage = () => {
         const token = localStorage.getItem('accessToken');
         if (token) {
             const decoded = jwtDecode(token);
-            console.log("Decoded Token:", decoded);
-
             const role = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
             if (role !== "Admin") {
                 navigate('/');
@@ -35,6 +33,21 @@ const AdminPage = () => {
             setError('Kunde inte hämta användare.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleRoleChange = async (userId, newRole) => {
+        try {
+            await updateUserRole(userId, newRole);
+            setUsers((prev) =>
+                prev.map((user) =>
+                    user.id === userId ? { ...user, role: newRole } : user
+                )
+            );
+            alert('Roll uppdaterad');
+        } catch (err) {
+            console.error('Kunde inte uppdatera roll:', err);
+            alert('Fel: ' + err.message);
         }
     };
 
@@ -61,7 +74,15 @@ const AdminPage = () => {
                             <tr key={user.id} className="text-gray-800 dark:text-gray-200">
                                 <td className="py-2">{user.username}</td>
                                 <td>{user.email}</td>
-                                <td>{user.role}</td>
+                                <td>
+                                    <select
+                                        value={user.role}
+                                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                                    >
+                                        <option value="Admin">Admin</option>
+                                        <option value="Användare">Användare</option>
+                                    </select>
+                                </td>
                             </tr>
                         ))}
                     </tbody>
