@@ -333,7 +333,7 @@ const PCBuilder = () => {
                                 <div className={`overflow-hidden transition-all duration-500 ease-in-out ${expandedPCs.includes(pc.id) ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
                                     <hr className="my-4 border-t border-gray-300 dark:border-gray-600" />
 
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr_1fr] gap-6">
                                         {/* Bild */}
                                         <div className="flex flex-col items-center justify-center py-2 text-center text-gray-600 dark:text-gray-300 text-sm">
                                             {pc.imageURL ? (

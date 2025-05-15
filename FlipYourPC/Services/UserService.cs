@@ -56,9 +56,14 @@ namespace FlipYourPC.Services
                 throw new ArgumentException("User not found.");
             }
 
-            if (userToUpdate.Id != currentUserId)
+            if (await _appDbContext.Users.AnyAsync(u => u.Email == userDto.Email && u.Id != currentUserId))
             {
-                throw new UnauthorizedAccessException("You can only update your own profile.");
+                throw new ArgumentException("Email används redan av en annan användare.");
+            }
+
+            if (await _appDbContext.Users.AnyAsync(u => u.Username == userDto.Username && u.Id != currentUserId))
+            {
+                throw new ArgumentException("Användarnamn används redan av en annan användare.");
             }
 
             userToUpdate.Username = userDto.Username;
@@ -116,6 +121,51 @@ namespace FlipYourPC.Services
 
             userToUpdateRole.Role = dto.NewRole;
             _appDbContext.Users.Update(userToUpdateRole);
+            await _appDbContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateUserAsAdmin(Guid userId, UserUpdateDTO dto)
+        {
+            var user = await _appDbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                throw new ArgumentException("User not found.");
+            }
+
+            if (await _appDbContext.Users.AnyAsync(u => u.Email == dto.Email && u.Id != userId))
+            {
+                throw new ArgumentException("E-postadressen används redan av en annan användare.");
+            }
+
+            if (await _appDbContext.Users.AnyAsync(u => u.Username == dto.Username && u.Id != userId))
+            {
+                throw new ArgumentException("Användarnamnet används redan av en annan användare.");
+            }
+
+            user.Username = dto.Username;
+            user.Email = dto.Email;
+            user.FirstName = dto.FirstName;
+            user.LastName = dto.LastName;
+            user.PhoneNumber = dto.PhoneNumber;
+            user.Address = dto.Address;
+            user.ZipCode = dto.ZipCode;
+            user.City = dto.City;
+
+            await _appDbContext.SaveChangesAsync();
+        }
+
+        public async Task ChangePasswordAsAdmin(ChangePasswordAdminDTO dto)
+        {
+            var user = await _appDbContext.Users.FirstOrDefaultAsync(u => u.Id == dto.UserId);
+            if (user == null)
+            {
+                throw new ArgumentException("Användaren hittades inte.");
+            }
+
+            var passwordHasher = new PasswordHasher<User>();
+            user.PasswordHash = passwordHasher.HashPassword(user, dto.NewPassword);
+
             await _appDbContext.SaveChangesAsync();
         }
     }

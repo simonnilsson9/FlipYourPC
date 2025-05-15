@@ -308,3 +308,52 @@ export const updateUserRole = async (roleData) => {
 
     return await response.text();
 };
+
+export const deleteUser = async (userId) => {
+    const response = await fetch(`${API_URL}/users/${userId}`, {
+        method: "DELETE",
+        headers: {
+            "Authorization": `Bearer ${token()}`
+        }
+    });
+
+    if (!response.ok) {
+        const data = await response.text();
+        throw new Error(data || "Kunde inte radera användare");
+    }
+
+    return true;
+};
+
+export const updateUserAsAdmin = async (userId, updatedData) => {
+    const token = localStorage.getItem('accessToken');
+    const response = await fetch(`${API_URL}/users/update-as-admin/${userId}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(updatedData)
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Fel vid uppdatering av användare");
+    }
+
+    return await response.json();
+};
+
+export const changePasswordAsAdmin = async (data) => {
+    const token = localStorage.getItem("accessToken");
+    const response = await fetch(`${API_URL}/users/admin-change-password`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok) throw new Error("Kunde inte uppdatera lösenordet.");
+};

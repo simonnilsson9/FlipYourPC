@@ -122,5 +122,61 @@ namespace FlipYourPC.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("delete-user")]
+        public async Task<IActionResult> DeleteUser([FromBody] Guid id)
+        {
+            try
+            {
+                var user = await _userService.GetUserByIdAsync(id);
+                if(user == null)
+                {
+                    return NotFound("User not found");
+                }
+
+                await _userService.DeleteUser(user);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("admin-update-user/{userId}")]
+        public async Task<IActionResult> AdminUpdateUser(Guid userId, [FromBody] UserUpdateDTO userDto)
+        {
+            try
+            {
+                await _userService.UpdateUserAsAdmin(userId, userDto);
+                return Ok("Användaren har uppdaterats.");
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("admin-change-password")]
+        public async Task<IActionResult> ChangePasswordAsAdmin([FromBody] ChangePasswordAdminDTO dto)
+        {
+            try
+            {
+                await _userService.ChangePasswordAsAdmin(dto);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
     }
 }

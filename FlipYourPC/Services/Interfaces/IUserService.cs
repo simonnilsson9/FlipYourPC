@@ -12,5 +12,7 @@ namespace FlipYourPC.Services.Interfaces
         Guid GetCurrentUserId();
         Task ChangePasswordAsync(ChangePasswordDTO dto);
         Task UpdateUserRole(UserUpdateRoleDTO dto);
+        Task UpdateUserAsAdmin(Guid id, UserUpdateDTO dto);
+        Task ChangePasswordAsAdmin(ChangePasswordAdminDTO dto);
     }
 }
