@@ -51,12 +51,5 @@ namespace FlipYourPC.Controllers
 
             return Ok(result);
         }
-
-        [Authorize]
-        [HttpGet]
-        public IActionResult AuthenticatedOnlyEndpoint()
-        {
-            return Ok("You are authenticated!");
-        }
     }
 }

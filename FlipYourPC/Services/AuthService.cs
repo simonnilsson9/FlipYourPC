@@ -63,6 +63,7 @@ namespace FlipYourPC.Services
             user.Email = request.Email;
             user.Username = request.Username;
             user.PasswordHash = hashedPassword;
+            user.Role = UserRoles.User;
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();

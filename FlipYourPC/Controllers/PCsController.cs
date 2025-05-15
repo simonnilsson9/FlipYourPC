@@ -2,6 +2,7 @@
 using FlipYourPC.Models.DTO;
 using FlipYourPC.Services;
 using FlipYourPC.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,7 @@ namespace FlipYourPC.Controllers
             _inventoryService = inventoryService;
         }
 
-        
+        [Authorize(Roles = "Användare,Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllPCs()
         {
@@ -38,6 +39,7 @@ namespace FlipYourPC.Controllers
             }
         }
 
+        [Authorize(Roles = "Användare,Admin")]
         [HttpGet]
         [Route("{id:guid}")]
         public async Task<IActionResult> GetPCById([FromRoute] Guid id)
@@ -58,6 +60,7 @@ namespace FlipYourPC.Controllers
             }
         }
 
+        [Authorize(Roles = "Användare,Admin")]
         [HttpPost]
         public async Task<IActionResult> CreatePC([FromBody] PCDTO pcDTO)
         {
@@ -83,6 +86,7 @@ namespace FlipYourPC.Controllers
             }
         }
 
+        [Authorize(Roles = "Användare,Admin")]
         [HttpPut]
         [Route("{pcId:guid}/add-components")]
         public async Task<IActionResult> AddComponentsToPC([FromRoute] Guid pcId, [FromBody] List<Guid> componentIds)
@@ -116,6 +120,7 @@ namespace FlipYourPC.Controllers
             }
         }
 
+        [Authorize(Roles = "Användare,Admin")]
         [HttpPut]
         [Route("{id:guid}")]
         public async Task<IActionResult> UpdatePC([FromRoute] Guid id, [FromBody] PCUpdateDTO pcDTO)
@@ -151,6 +156,7 @@ namespace FlipYourPC.Controllers
             }
         }
 
+        [Authorize(Roles = "Användare,Admin")]
         [HttpDelete]
         [Route("{id:guid}")]
         public async Task<IActionResult> DeletePC([FromRoute] Guid id)
@@ -172,6 +178,7 @@ namespace FlipYourPC.Controllers
             }
         }
 
+        [Authorize(Roles = "Användare,Admin")]
         [HttpPut("{pcId:guid}/remove-component")]
         public async Task<IActionResult> RemoveComponentFromPC(Guid pcId, [FromBody] Guid componentId)
         {

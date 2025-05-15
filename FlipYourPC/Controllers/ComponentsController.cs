@@ -20,6 +20,7 @@ namespace FlipYourPC.Controllers
             _inventoryService = inventoryService;
         }
 
+        [Authorize(Roles = "Användare,Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllComponents()
         {
@@ -42,7 +43,7 @@ namespace FlipYourPC.Controllers
             }     
         }
 
-        [Authorize]
+        [Authorize(Roles = "Användare,Admin")]
         [HttpGet]
         [Route("{id:guid}")]
         public async Task<IActionResult> GetComponentById([FromRoute] Guid id)
@@ -73,6 +74,7 @@ namespace FlipYourPC.Controllers
             }
         }
 
+        [Authorize(Roles = "Användare,Admin")]
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateComponent([FromBody] Component component)
@@ -109,7 +111,7 @@ namespace FlipYourPC.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "Användare,Admin")]
         [HttpPut]
         [Route("{id:guid}")]
         public async Task<IActionResult> UpdateComponent([FromRoute] Guid id, Component component)
@@ -147,7 +149,7 @@ namespace FlipYourPC.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "Användare,Admin")]
         [HttpDelete]
         [Route("{id:guid}")]
         public async Task<IActionResult> DeleteComponent([FromRoute] Guid id)
@@ -183,7 +185,7 @@ namespace FlipYourPC.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "Användare,Admin")]
         [HttpGet]
         [Route("name/{name}")]
         public async Task<IActionResult> GetComponentByName([FromRoute] string name)

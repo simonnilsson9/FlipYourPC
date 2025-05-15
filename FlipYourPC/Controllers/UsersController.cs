@@ -1,6 +1,7 @@
 ﻿using FlipYourPC.Entities;
 using FlipYourPC.Models.DTO;
 using FlipYourPC.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +17,7 @@ namespace FlipYourPC.Controllers
             _userService = userService;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -30,6 +32,7 @@ namespace FlipYourPC.Controllers
             }
         }
 
+        [Authorize(Roles = "Användare,Admin")]
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetUserById([FromRoute] Guid id)
         {
@@ -48,6 +51,7 @@ namespace FlipYourPC.Controllers
             }
         }
 
+        [Authorize(Roles = "Användare,Admin")]
         [HttpPut("update")]
         public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDTO userUpdateDTO)
         {
@@ -63,6 +67,7 @@ namespace FlipYourPC.Controllers
             }
         }
 
+        [Authorize(Roles = "Användare,Admin")]
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUser()
         {
@@ -83,6 +88,7 @@ namespace FlipYourPC.Controllers
             }
         }
 
+        [Authorize(Roles = "Användare,Admin")]
         [HttpPut("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO dto)
         {

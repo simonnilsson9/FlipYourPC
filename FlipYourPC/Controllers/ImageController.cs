@@ -1,6 +1,7 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using FlipYourPC.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -20,6 +21,7 @@ namespace FlipYourPC.Controllers
             _cloudinary = new Cloudinary(account);
         }
 
+        [Authorize(Roles = "Användare,Admin")]
         [HttpPost("upload")]
         public async Task<IActionResult> UploadImage(IFormFile file)
         {

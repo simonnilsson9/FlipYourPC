@@ -15,7 +15,7 @@ namespace FlipYourPC.Controllers
             _inventoryService = inventoryService;
         }
 
-        [Authorize]
+        [Authorize(Roles = "Användare,Admin")]
         [HttpGet("inventory")]
         public async Task<IActionResult> GetInventory()
         {
