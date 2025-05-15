@@ -125,7 +125,7 @@ namespace FlipYourPC.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser([FromBody] Guid id)
+        public async Task<IActionResult> DeleteUser(Guid id)
         {
             try
             {
