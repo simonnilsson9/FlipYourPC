@@ -34,10 +34,14 @@ namespace FlipYourPC.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<TokenResponseDTO>> Login(UserDTO request)
+        public async Task<ActionResult<TokenResponseDTO>> Login(LoginRequestDTO request)
         {
-            var response = await _authService.LoginAsync(request);
-            if(response == null)
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = await _authService.LoginAsync(request.Identifier, request.Password);
+            if (response == null)
             {
                 return BadRequest("Invalid credentials");
             }

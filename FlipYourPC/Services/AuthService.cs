@@ -23,15 +23,20 @@ namespace FlipYourPC.Services
             _context = context;
             _configuration = configuration;
         }
-        public async Task<TokenResponseDTO?> LoginAsync(UserDTO request)
+        public async Task<TokenResponseDTO?> LoginAsync(string identifier, string password)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username || u.Email == request.Email);
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Username == identifier || u.Email == identifier);
+
             if (user is null)
             {
                 return null;
             }
-            if (new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, request.Password)
-                == PasswordVerificationResult.Failed)
+
+            var hasher = new PasswordHasher<User>();
+            var result = hasher.VerifyHashedPassword(user, user.PasswordHash, password);
+
+            if (result == PasswordVerificationResult.Failed)
             {
                 return null;
             }

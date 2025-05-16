@@ -6,7 +6,7 @@ namespace FlipYourPC.Services.Interfaces
     public interface IAuthService
     {
         Task<User?> RegisterAsync(UserDTO request);
-        Task<TokenResponseDTO?> LoginAsync(UserDTO request);
+        Task<TokenResponseDTO?> LoginAsync(string identifier, string password);
         Task<TokenResponseDTO?> RefreshTokensAsync(RefreshTokenRequestDTO request);
     }
 }
