@@ -30,7 +30,6 @@ const PCBuilder = () => {
     const [pcName, setPcName] = useState("");
     const [pcDescription, setPcDescription] = useState("");
     const [pcPrice, setPcPrice] = useState("");
-    const [pcImageURL, setPcImageURL] = useState("");
     const [listedAt, setListedAt] = useState("");
     const [soldAt, setSoldAt] = useState("");
 
@@ -115,7 +114,7 @@ const PCBuilder = () => {
                     name: pcName,
                     description: pcDescription,
                     price: parseInt(pcPrice) || 0,
-                    imageURL: pcImageURL,
+                    imageURL: currentPC.imageURL,
                     isSold: currentPC.isSold,
                     listedAt: listedAt || currentPC.listedAt,
                     soldAt: soldAt === "" ? null : soldAt
@@ -184,7 +183,6 @@ const PCBuilder = () => {
     };
 
     const handleImageUpload = async (url, pc) => {
-        setPcImageURL(url);
 
         const token = localStorage.getItem("accessToken");
         if (!token) return;
@@ -347,7 +345,10 @@ const PCBuilder = () => {
                                                     Ingen bild
                                                 </div>
                                             )}
-                                            <ImageUploader onUpload={(url) => handleImageUpload(url, pc)} />
+                                            <ImageUploader
+                                                pcId={pc.id}
+                                                onUpload={(url) => handleImageUpload(url, pc)}
+                                            />
                                         </div>
 
                                         {/* Specifikationer */}
@@ -409,7 +410,6 @@ const PCBuilder = () => {
                                                 setPcName(pc.name);
                                                 setPcDescription(pc.description || "");
                                                 setPcPrice(pc.price || "");
-                                                setPcImageURL(pc.imageURL || "");
                                                 setListedAt(pc.listedAt ? pc.listedAt.split("T")[0] : "");
                                                 setSoldAt(pc.soldAt ? pc.soldAt.split("T")[0] : "");
                                                 setShowEditModal(true);
@@ -509,18 +509,7 @@ const PCBuilder = () => {
                                 onChange={(e) => setPcPrice(e.target.value)}
                                 className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
                             />
-                        </div>
-
-                        {/* Bild URL */}
-                        <div className="mb-6">
-                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Bild URL</label>
-                            <input
-                                type="text"
-                                value={pcImageURL}
-                                onChange={(e) => setPcImageURL(e.target.value)}
-                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
-                            />
-                        </div>
+                        </div>                        
 
                         {/* Listat datum */}
                         <div className="mb-4">
