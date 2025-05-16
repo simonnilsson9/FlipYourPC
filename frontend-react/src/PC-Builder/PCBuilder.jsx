@@ -23,6 +23,7 @@ const PCBuilder = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showCompListModal, setShowCompListModal] = useState(false);
     const [showAddCompModal, setShowAddCompModal] = useState(false);
+    const [pcFormError, setPcFormError] = useState("");
 
     const [currentPC, setCurrentPC] = useState(null);
     const [currentComponents, setCurrentComponents] = useState([]);
@@ -77,18 +78,24 @@ const PCBuilder = () => {
     };
 
     const handleCreatePC = async () => {
-        const token = localStorage.getItem("accessToken");
-        if (!token || !pcName) return;
-        try {
-            await createPC({ name: pcName }, token);
-            setShowCreateModal(false);
-            setPcName("");
-            fetchPCs();
-            showAlert("success", "Skapad", "Din PC har skapats.");
-        } catch (err) {
-            console.error("Error creating PC:", err);
-            showAlert("error", "Fel", "Kunde inte skapa bygget.");
+        const result = await createPC({ name: pcName, listedAt: new Date().toISOString() });
+
+        if (!result.success) {
+            if (result.status === 400 && result.data.errors) {
+                const firstError = Object.values(result.data.errors)[0][0];
+                setPcFormError(firstError);
+            } else {
+                setPcFormError("Kunde inte skapa bygget.");
+            }
+            return;
         }
+
+        // Success
+        setPcFormError("");
+        setShowCreateModal(false);
+        setPcName("");
+        fetchPCs();
+        showAlert("success", "Skapad", "Din PC har skapats.");
     };
 
     const handleDeletePC = async (id) => {
@@ -105,29 +112,35 @@ const PCBuilder = () => {
     };
 
     const handleEditPC = async () => {
-        const token = localStorage.getItem("accessToken");
-        if (!token || !currentPC) return;
-        try {
-            await updatePC(
-                currentPC.id,
-                {
-                    name: pcName,
-                    description: pcDescription,
-                    price: parseInt(pcPrice) || 0,
-                    imageURL: currentPC.imageURL,
-                    isSold: currentPC.isSold,
-                    listedAt: listedAt || currentPC.listedAt,
-                    soldAt: soldAt === "" ? null : soldAt
-                },
-                token
-            );
-            setShowEditModal(false);
-            fetchPCs();
-            showAlert("success", "Uppdaterad", "Din PC har uppdaterats.");
-        } catch (err) {            
-            console.error("Error updating PC:", err);
-            showAlert("error", "Fel", "Kunde inte uppdatera din PC.");
+        if (!currentPC) return;
+
+        const pcUpdateData = {
+            name: pcName,
+            description: pcDescription,
+            price: parseInt(pcPrice) || 0,
+            imageURL: currentPC.imageURL,
+            isSold: currentPC.isSold,
+            listedAt: listedAt || currentPC.listedAt,
+            soldAt: soldAt === "" ? null : soldAt
+        };
+
+        const result = await updatePC(currentPC.id, pcUpdateData);
+
+        if (!result.success) {
+            if (result.status === 400 && result.data.errors) {
+                const firstError = Object.values(result.data.errors)[0][0];
+                setPcFormError(firstError);
+            } else {
+                setPcFormError("Kunde inte uppdatera PC:n.");
+            }
+            return;
         }
+
+        // Success
+        setPcFormError("");
+        setShowEditModal(false);
+        fetchPCs();
+        showAlert("success", "Uppdaterad", "Din PC har uppdaterats.");
     };
 
     const handleAddComponent = async (compId) => {
@@ -445,13 +458,20 @@ const PCBuilder = () => {
 
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6">
                         <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Skapa nytt PC-bygge</h2>
-
+                        {pcFormError && (
+                            <div className="mb-4 text-sm text-red-600 dark:text-red-400">
+                                {pcFormError}
+                            </div>
+                        )}
                         <div className="mb-4">
                             <label className="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-300">Namn</label>
                             <input
                                 type="text"
                                 value={pcName}
-                                onChange={(e) => setPcName(e.target.value)}
+                                onChange={(e) => {
+                                    setPcName(e.target.value);
+                                    setPcFormError("");
+                                }}
                                 className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
                                 placeholder="Skriv namn på PC:n"
                             />
@@ -479,14 +499,21 @@ const PCBuilder = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-lg p-6">
                         <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Redigera PC-bygge</h2>
-
+                        {pcFormError && (
+                            <div className="mb-4 text-sm text-red-600 dark:text-red-400">
+                                {pcFormError}
+                            </div>
+                        )}
                         {/* Namn */}
                         <div className="mb-4">
                             <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Namn</label>
                             <input
                                 type="text"
                                 value={pcName}
-                                onChange={(e) => setPcName(e.target.value)}
+                                onChange={(e) => {
+                                    setPcName(e.target.value);
+                                    setPcFormError("");
+                                }}
                                 className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
                             />
                         </div>
@@ -508,7 +535,10 @@ const PCBuilder = () => {
                             <input
                                 type="number"
                                 value={pcPrice}
-                                onChange={(e) => setPcPrice(e.target.value)}
+                                onChange={(e) => {
+                                    setPcPrice(e.target.value)
+                                    setPcFormError("");
+                                }}
                                 className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
                             />
                         </div>                        
@@ -521,8 +551,11 @@ const PCBuilder = () => {
                             <input
                                 type="date"
                                 value={listedAt}
-                                onChange={(e) => setListedAt(e.target.value)}
-                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
+                                onChange={(e) => {
+                                    setListedAt(e.target.value);
+                                    setPcFormError("");
+                                }}
+                                className={`w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white ${pcFormError.includes('Listat') ? 'border-red-500' : ''}`}
                             />
                         </div>
 
@@ -534,8 +567,11 @@ const PCBuilder = () => {
                             <input
                                 type="date"
                                 value={soldAt}
-                                onChange={(e) => setSoldAt(e.target.value)}
-                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
+                                onChange={(e) => {
+                                    setSoldAt(e.target.value);
+                                    setPcFormError("");
+                                }}
+                                className={`w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white ${pcFormError.includes('Sålt') ? 'border-red-500' : ''}`}
                             />
                         </div>
 

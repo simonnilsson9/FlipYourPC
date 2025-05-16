@@ -66,6 +66,10 @@ namespace FlipYourPC.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
                 if (pcDTO == null)
                 {
                     return BadRequest(new { message = "Invalid PC data." });
@@ -127,6 +131,11 @@ namespace FlipYourPC.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
                 if (pcDTO == null)
                 {
                     return BadRequest(new { message = "Invalid PC data." });

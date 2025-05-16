@@ -25,7 +25,7 @@ export const saveComponent = async (component) => {
     const url = isUpdate ? `${API_URL}/components/${component.id}` : `${API_URL}/components`;
     const method = isUpdate ? "PUT" : "POST";
 
-    return await fetch(url, {
+    const response = await fetch(url, {
         method,
         headers: {
             "Authorization": `Bearer ${token()}`,
@@ -33,6 +33,14 @@ export const saveComponent = async (component) => {
         },
         body: JSON.stringify(component)
     });
+
+    const data = await response.json().catch(() => ({}));
+
+    return {
+        success: response.ok,
+        status: response.status,
+        data: data
+    };
 };
 
 // Funktion för att hämta alla PCs (PC-bygg)
@@ -58,49 +66,43 @@ export const getAllPCs = async (token) => {
 };
 
 // Funktion för att skapa ett nytt PC-bygg
-export const createPC = async (pcData, token) => {
-    try {
-        const response = await fetch(`${API_URL}/pcs`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(pcData), 
-        });
+export const createPC = async (pcData) => {
+    const response = await fetch(`${API_URL}/pcs`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token()}`
+        },
+        body: JSON.stringify(pcData)
+    });
 
-        if (response.ok) {
-            return await response.json();
-        } else {
-            throw new Error("Error creating PC");
-        }
-    } catch (error) {
-        console.error(error);
-        throw error;
-    }
+    const data = await response.json().catch(() => ({}));
+
+    return {
+        success: response.ok,
+        status: response.status,
+        data: data
+    };
 };
 
 // Funktion för att uppdatera ett PC-bygg
-export const updatePC = async (pcId, pcData, token) => {
-    try {
-        const response = await fetch(`${API_URL}/pcs/${pcId}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`, 
-            },
-            body: JSON.stringify(pcData), 
-        });
-       
-        if (response.ok) {
-            return await response.json(); 
-        } else {
-            throw new Error("Error updating PC");
-        }
-    } catch (error) {
-        console.error(error);
-        throw error; 
-    }
+export const updatePC = async (pcId, pcData) => {
+    const response = await fetch(`${API_URL}/pcs/${pcId}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token()}`,
+        },
+        body: JSON.stringify(pcData),
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    return {
+        success: response.ok,
+        status: response.status,
+        data: data
+    };
 };
 
 // Funktion för att ta bort ett PC-bygg

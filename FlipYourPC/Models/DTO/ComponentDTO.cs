@@ -4,10 +4,10 @@ namespace FlipYourPC.Models.DTO
 {
     public class ComponentDTO
     {
-        [Required]
+        [Required(ErrorMessage = "Du måste ange namn.")]
         [StringLength(100, ErrorMessage = "Namn får max vara 100 tecken.")]
         public string Name { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Du måste ange ett pris.")]
         [Range(0, int.MaxValue, ErrorMessage = "Pris måste vara ett positivt tal")]
         public int Price { get; set; }
         [StringLength(50, ErrorMessage = "Tillverkare får max vara 50 tecken")]

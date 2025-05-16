@@ -22,6 +22,7 @@ const InventoryPage = () => {
     const [showConfirm, setShowConfirm] = useState(false);
     const [componentToDelete, setComponentToDelete] = useState(null);
     const [alert, setAlert] = useState(null);
+    const [validationError, setValidationError] = useState("");
     const navigate = useNavigate();
 
     const token = localStorage.getItem("accessToken");
@@ -92,24 +93,43 @@ const InventoryPage = () => {
         }
     };
 
+    const [modalError, setModalError] = useState("");
+
     const handleSave = async () => {
         const { name, price, manufacturer, type } = currentComponent;
-        if (!name || !price || !manufacturer || !type) {
-            setAlert({ type: "error", title: "Fel", message: "Fyll i alla fält." });
+
+        // Frontend validering för "Typ av komponent"
+        if (!type) {
+            setModalError("Du måste välja en typ av komponent.");
             return;
         }
 
+        // Rensa ev. tidigare fel
+        setModalError("");
+
         try {
-            await saveComponent({
+            const result = await saveComponent({
                 ...currentComponent,
                 price: parseInt(price),
             });
 
+            if (!result.success) {
+                if (result.status === 400 && result.data.errors) {
+                    const firstError = Object.values(result.data.errors)[0][0];
+                    setModalError(firstError);
+                } else {
+                    setModalError("Kunde inte spara komponenten.");
+                }
+                return;
+            }
+
+            // Success!
+            setModalError("");
             setShowModal(false);
             loadInventory();
             setAlert({ type: "default", title: "Sparad", message: "Komponenten har sparats." });
         } catch (error) {
-            setAlert({ type: "error", title: "Fel", message: "Kunde inte spara komponenten." });
+            setModalError("Något gick fel vid sparning.");
         }
     };
 
@@ -233,6 +253,11 @@ const InventoryPage = () => {
                         <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
                             {currentComponent?.id ? "Redigera komponent" : "Lägg till komponent"}
                         </h2>
+                        {modalError &&(
+                            <div className="mb-4 text-sm text-red-600 dark:text-red-400">
+                                {modalError}
+                            </div>
+                        )}
 
                         {/* Typ */}
                         <div className="mb-6">
