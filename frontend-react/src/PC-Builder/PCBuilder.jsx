@@ -193,7 +193,9 @@ const PCBuilder = () => {
                 description: pc.description,
                 price: pc.price,
                 imageURL: url,
-                isSold: pc.isSold
+                isSold: pc.isSold,
+                listedAt: pc.listedAt,
+                soldAt: pc.soldAt
             }, token);
 
             fetchPCs();

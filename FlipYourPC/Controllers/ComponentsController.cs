@@ -1,5 +1,5 @@
 ﻿using FlipYourPC.Models;
-using FlipYourPC.Services;
+using FlipYourPC.Models.DTO;
 using FlipYourPC.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -23,23 +23,15 @@ namespace FlipYourPC.Controllers
         [Authorize(Roles = "Användare,Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllComponents()
-        {
-            var response = new APIResponse();
+        {            
             try
             {
                 var components = await _componentService.GetAllComponentsAsync();
-                response.IsSuccess = true;
-                response.StatusCode = HttpStatusCode.OK;
-                response.Result = components;
-
-                return Ok(response);
+                return Ok(components);
             }
             catch (Exception ex)
             {
-                response.IsSuccess = false;
-                response.StatusCode = HttpStatusCode.NotFound;
-                response.ErrorMessages.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+                return BadRequest(ex.Message);
             }     
         }
 
@@ -47,106 +39,67 @@ namespace FlipYourPC.Controllers
         [HttpGet]
         [Route("{id:guid}")]
         public async Task<IActionResult> GetComponentById([FromRoute] Guid id)
-        {
-            var response = new APIResponse();
+        {           
             try
             {
                 var component = await _componentService.GetComponentByIdAsync(id);
                 if (component == null)
                 {
-                    response.IsSuccess = false;
-                    response.StatusCode = HttpStatusCode.NotFound;
-                    response.ErrorMessages.Add("Component not found.");
-                    return NotFound(response);
+                    return NotFound("Komponenten hittades inte.");
                 }
 
-                response.IsSuccess = true;
-                response.StatusCode = HttpStatusCode.OK;
-                response.Result = component;
-                return Ok(response);
+                return Ok(component);
             }
             catch (Exception ex)
             {
-                response.IsSuccess = false;
-                response.StatusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMessages.Add($"Error fetching component: {ex.Message}");
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+                return BadRequest(ex.Message);
             }
         }
 
         [Authorize(Roles = "Användare,Admin")]
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> CreateComponent([FromBody] Component component)
+        public async Task<IActionResult> CreateComponent([FromBody] ComponentDTO dto)
         {
-            var response = new APIResponse();
-            try
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var component = new Component
             {
-                if (component == null)
-                {
-                    response.IsSuccess = false;
-                    response.StatusCode = HttpStatusCode.BadRequest;
-                    response.ErrorMessages.Add("Invalid component data.");
-                    return BadRequest(response);
-                }
+                Id = Guid.NewGuid(),
+                Name = dto.Name,
+                Price = dto.Price,
+                Manufacturer = dto.Manufacturer,
+                Store = dto.Store,
+                Type = dto.Type
+            };
 
-                // Lägg till komponenten i databasen (Components-tabellen)
-                await _componentService.CreateComponentAsync(component);
+            await _componentService.CreateComponentAsync(component);
+            await _inventoryService.AddComponentToInventoryAsync(component);
 
-                // Lägg till komponenten i inventory
-                await _inventoryService.AddComponentToInventoryAsync(component);
-
-                response.IsSuccess = true;
-                response.StatusCode = HttpStatusCode.Created;
-                response.Result = component;
-
-                return CreatedAtAction(nameof(GetComponentById), new { id = component.Id }, response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.StatusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMessages.Add($"Error creating component: {ex.Message}");
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
+            return CreatedAtAction(nameof(GetComponentById), new { id = component.Id }, component);
         }
 
         [Authorize(Roles = "Användare,Admin")]
-        [HttpPut]
-        [Route("{id:guid}")]
-        public async Task<IActionResult> UpdateComponent([FromRoute] Guid id, Component component)
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> UpdateComponent(Guid id, [FromBody] ComponentDTO dto)
         {
-            var response = new APIResponse();
-            try
-            {
-                var existingComponent = await _componentService.GetComponentByIdAsync(id);
-                if (existingComponent == null)
-                {
-                    response.IsSuccess = false;
-                    response.StatusCode = HttpStatusCode.NotFound;
-                    response.ErrorMessages.Add("Component not found.");
-                    return NotFound(response);
-                }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-                existingComponent.Name = component.Name;
-                existingComponent.Price = component.Price;
-                existingComponent.Manufacturer = component.Manufacturer;
-                existingComponent.Store = component.Store;
-                existingComponent.Type = component.Type;
-                existingComponent.PCId = component.PCId;
+            var existingComponent = await _componentService.GetComponentByIdAsync(id);
+            if (existingComponent == null)
+                return NotFound("Komponent hittades inte.");
 
-                await _componentService.UpdateComponentAsync(existingComponent);
-                response.IsSuccess = true;
-                response.StatusCode = HttpStatusCode.NoContent;
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.StatusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMessages.Add($"Error updating component: {ex.Message}");
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
+            existingComponent.Name = dto.Name;
+            existingComponent.Price = dto.Price;
+            existingComponent.Manufacturer = dto.Manufacturer;
+            existingComponent.Store = dto.Store;
+            existingComponent.Type = dto.Type;
+
+            await _componentService.UpdateComponentAsync(existingComponent);
+
+            return NoContent();
         }
 
         [Authorize(Roles = "Användare,Admin")]
@@ -154,16 +107,12 @@ namespace FlipYourPC.Controllers
         [Route("{id:guid}")]
         public async Task<IActionResult> DeleteComponent([FromRoute] Guid id)
         {
-            var response = new APIResponse();
             try
             {
                 var component = await _componentService.GetComponentByIdAsync(id);
                 if (component == null)
                 {
-                    response.IsSuccess = false;
-                    response.StatusCode = HttpStatusCode.NotFound;
-                    response.ErrorMessages.Add("Component not found.");
-                    return NotFound(response);
+                    return NotFound("Komponenten hittades inte.");
                 }
 
                 // Ta bort komponenten från inventory
@@ -172,16 +121,11 @@ namespace FlipYourPC.Controllers
                 // Ta bort komponenten från Components-tabellen
                 await _componentService.DeleteComponentAsync(component);
 
-                response.IsSuccess = true;
-                response.StatusCode = HttpStatusCode.NoContent;
                 return NoContent();
             }
             catch (Exception ex)
             {
-                response.IsSuccess = false;
-                response.StatusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMessages.Add($"Error deleting component: {ex.Message}");
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -190,29 +134,19 @@ namespace FlipYourPC.Controllers
         [Route("name/{name}")]
         public async Task<IActionResult> GetComponentByName([FromRoute] string name)
         {
-            var response = new APIResponse();
             try
             {
                 var component = await _componentService.GetComponentByNameAsync(name);
                 if (component == null)
                 {
-                    response.IsSuccess = false;
-                    response.StatusCode = HttpStatusCode.NotFound;
-                    response.ErrorMessages.Add("Component not found.");
-                    return NotFound(response);
+                    return NotFound("Komponenten hitttades inte.");
                 }
 
-                response.IsSuccess = true;
-                response.StatusCode = HttpStatusCode.OK;
-                response.Result = component;
-                return Ok(response);
+                return Ok(component);
             }
             catch (Exception ex)
             {
-                response.IsSuccess = false;
-                response.StatusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMessages.Add($"Error fetching component by name: {ex.Message}");
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+                return BadRequest(ex.Message);
             }
         }
     }
