@@ -22,6 +22,7 @@ const MyPage = () => {
     const [alert, setAlert] = useState(null);
     const [showOldPassword, setShowOldPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
+    const [passwordFormError, setPasswordFormError] = useState('');
 
     useEffect(() => {
         fetchMyUser().then(setUser).catch(console.error);
@@ -53,18 +54,27 @@ const MyPage = () => {
     };
 
     const handleProfileSave = async () => {
-        try {
-            await updateUser(formData);
-            setAlert({ type: 'success', title: 'Sparad', message: 'Profilen är uppdaterad!' });
-        } catch (err) {
-            console.error("Error updating profile:", err);
-            setAlert({ type: 'error', title: 'Fel', message: 'Kunde inte uppdatera profilen.' });
+        const result = await updateUser(formData);
+
+        if (!result.success) {
+            if (result.status === 400 && result.data.errors) {
+                const firstError = Object.values(result.data.errors)[0][0];
+                setAlert({ type: 'error', title: 'Fel', message: firstError });
+            } else {
+                setAlert({ type: 'error', title: 'Fel', message: 'Kunde inte uppdatera profilen.' });
+            }
+            return;
         }
+
+        // Success
+        setAlert({ type: 'success', title: 'Sparad', message: 'Profilen är uppdaterad!' });
     };
 
     const handlePasswordSave = async () => {
+        setPasswordFormError(''); // Rensa ev. tidigare fel
+
         if (!passwordData.oldPassword || !passwordData.newPassword) {
-            setAlert({ type: 'error', title: 'Fel', message: 'Fyll i både nuvarande och nytt lösenord' });
+            setPasswordFormError('Fyll i både nuvarande och nytt lösenord');
             return;
         }
 
@@ -74,7 +84,15 @@ const MyPage = () => {
             setAlert({ type: 'success', title: 'Sparad', message: 'Lösenordet är uppdaterat!' });
         } catch (err) {
             console.error("Error changing password:", err);
-            setAlert({ type: 'error', title: 'Fel', message: err.message || 'Kunde inte uppdatera lösenordet.' });
+
+            if (err.type === 'validation' && err.errors) {
+                // Plocka ut första felet från ModelState
+                const firstError = Object.values(err.errors)[0][0];
+                setPasswordFormError(firstError);
+            } else {
+                // Generellt felmeddelande
+                setPasswordFormError(err.message || 'Kunde inte uppdatera lösenordet.');
+            }
         }
     };
 
@@ -132,6 +150,11 @@ const MyPage = () => {
                 {/* Lösenordsbyte */}
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
                     <h3 className="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">Byt lösenord</h3>
+                    {passwordFormError && (
+                        <div className="mb-4 text-sm text-red-600 dark:text-red-400">
+                            {passwordFormError}
+                        </div>
+                    )}
                     {/* Nuvarande lösenord med toggle */}
                     <div className="mb-4 relative">
                         <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">Nuvarande lösenord</label>

@@ -191,27 +191,22 @@ export const removeComponentFromPC = async (pcId, componentId, token) => {
 
 // Funktion för att uppdatera användaren
 export const updateUser = async (userUpdateData) => {
-    try {
-        const response = await fetch(`${API_URL}/users/update`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token()}`
-            },
-            body: JSON.stringify(userUpdateData)
-        });
+    const response = await fetch(`${API_URL}/users/update`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token()}`
+        },
+        body: JSON.stringify(userUpdateData)
+    });
 
-        const responseData = await response.json(); // alltid försök läsa JSON
+    const data = await response.json().catch(() => ({}));
 
-        if (!response.ok) {
-            throw new Error(responseData.message || "Error updating user");
-        }
-
-        return responseData; // returnera message eller data från backend
-    } catch (error) {
-        console.error("Error updating user:", error);
-        throw error;
-    }
+    return {
+        success: response.ok,
+        status: response.status,
+        data: data
+    };
 };
 
 // Funktion för att hämta användardata baserat på ID
@@ -281,12 +276,18 @@ export const changePassword = async (passwordData) => {
             body: JSON.stringify(passwordData),
         });
 
+        const responseData = await response.json().catch(() => null);
+
         if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText || "Error changing password");
+            // ModelState errors
+            if (responseData?.errors) {
+                throw { type: "validation", errors: responseData.errors };
+            }
+            // Generic error message
+            throw new Error(responseData?.error || responseData?.message || "Error changing password");
         }
-        // Om du vill hantera ett meddelande från backend, returnera texten här:
-        return await response.text();
+
+        return responseData; // Success (ex: { message: "Lösenordet har uppdaterats." })
     } catch (error) {
         console.error("Error changing password:", error);
         throw error;
@@ -337,16 +338,18 @@ export const updateUserAsAdmin = async (userId, userData) => {
         body: JSON.stringify(userData)
     });
 
-    if (!response.ok) {
-        const data = await response.text();
-        throw new Error(data || "Kunde inte uppdatera användaren");
-    }
+    const data = await response.json().catch(() => ({}));
 
-    return true;
+    return {
+        success: response.ok,
+        status: response.status,
+        data: data
+    };
 };
 
 export const changePasswordAsAdmin = async (data) => {
     const token = localStorage.getItem("accessToken");
+
     const response = await fetch(`${API_URL}/users/admin-change-password`, {
         method: "PUT",
         headers: {
@@ -356,5 +359,11 @@ export const changePasswordAsAdmin = async (data) => {
         body: JSON.stringify(data)
     });
 
-    if (!response.ok) throw new Error("Kunde inte uppdatera lösenordet.");
+    const responseData = await response.json().catch(() => ({}));
+
+    return {
+        success: response.ok,
+        status: response.status,
+        data: responseData
+    };
 };

@@ -29,6 +29,7 @@ const AdminPage = () => {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [passwordModalError, setPasswordModalError] = useState("");
 
     const fieldTranslations = {
         username: "Användarnamn",
@@ -112,6 +113,42 @@ const AdminPage = () => {
                 showAlert("error", "Fel", "Kunde inte ta bort användaren.");
             }
         }
+    };
+
+    const handleChangePassword = async () => {
+        setPasswordModalError("");
+
+        if (newPassword.length < 6) {
+            setPasswordModalError("Lösenordet måste vara minst 6 tecken.");
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            setPasswordModalError("Lösenorden stämmer inte överens.");
+            return;
+        }
+
+        const result = await changePasswordAsAdmin({
+            userId: passwordModalUser.id,
+            newPassword
+        });
+
+        if (!result.success) {
+            if (result.status === 400 && result.data.errors) {
+                const firstError = Object.values(result.data.errors)[0][0];
+                setPasswordModalError(firstError);
+            } else if (result.data.error) {
+                setPasswordModalError(result.data.error);
+            } else {
+                setPasswordModalError("Kunde inte ändra lösenord.");
+            }
+            return;
+        }
+
+        showAlert("success", "Lösenord ändrat", "Lösenordet är uppdaterat.");
+        setPasswordModalUser(null);
+        setNewPassword("");
+        setConfirmPassword("");
     };
 
     const showAlert = (type, title, message) => {
@@ -226,6 +263,12 @@ const AdminPage = () => {
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6">
                         <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Ändra lösenord för {passwordModalUser.username}</h2>
 
+                        {passwordModalError && (
+                            <div className="mb-4 text-sm text-red-600 dark:text-red-400">
+                                {passwordModalError}
+                            </div>
+                        )}
+
                         <div className="mb-4 relative">
                             <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">Nytt lösenord</label>
                             <input
@@ -266,34 +309,14 @@ const AdminPage = () => {
                                     setPasswordModalUser(null);
                                     setNewPassword("");
                                     setConfirmPassword("");
+                                    setPasswordModalError("");
                                 }}
                                 className="px-4 py-2 text-sm bg-gray-500 hover:bg-gray-700 rounded dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
                             >
                                 Avbryt
                             </button>
                             <button
-                                onClick={async () => {
-                                    if (newPassword.length < 6) {
-                                        showAlert("error", "Fel", "Lösenordet måste vara minst 6 tecken.");
-                                        return;
-                                    }
-                                    if (newPassword !== confirmPassword) {
-                                        showAlert("error", "Fel", "Lösenorden stämmer inte överens.");
-                                        return;
-                                    }
-                                    try {
-                                        await changePasswordAsAdmin({
-                                            userId: passwordModalUser.id,
-                                            newPassword
-                                        });
-                                        showAlert("success", "Lösenord ändrat", "Lösenordet är uppdaterat.");
-                                        setPasswordModalUser(null);
-                                        setNewPassword("");
-                                        setConfirmPassword("");
-                                    } catch (err) {
-                                        showAlert("error", "Fel", err.message || "Kunde inte ändra lösenord.");
-                                    }
-                                }}
+                                onClick={handleChangePassword}
                                 className="px-4 py-2 text-sm bg-yellow-600 hover:bg-yellow-700 text-white rounded"
                             >
                                 Ändra lösenord

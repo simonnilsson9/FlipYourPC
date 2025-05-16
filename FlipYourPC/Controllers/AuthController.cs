@@ -19,6 +19,11 @@ namespace FlipYourPC.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<User>> Register(UserDTO request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var user = await _authService.RegisterAsync(request);
             if(user == null)
             {

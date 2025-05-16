@@ -55,8 +55,13 @@ namespace FlipYourPC.Controllers
         [HttpPut("update")]
         public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDTO userUpdateDTO)
         {
-            try
+            if (!ModelState.IsValid)
             {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {                
                 await _userService.UpdateUser(userUpdateDTO);
                 return Ok(new {message = "User updated successfully"});
             }
@@ -92,6 +97,11 @@ namespace FlipYourPC.Controllers
         [HttpPut("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             try
             {
                 await _userService.ChangePasswordAsync(dto);
@@ -149,6 +159,10 @@ namespace FlipYourPC.Controllers
         [HttpPut("admin-update-user/{userId}")]
         public async Task<IActionResult> AdminUpdateUser(Guid userId, [FromBody] UserUpdateDTO userDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             try
             {
                 await _userService.UpdateUserAsAdmin(userId, userDto);
@@ -168,6 +182,11 @@ namespace FlipYourPC.Controllers
         [HttpPut("admin-change-password")]
         public async Task<IActionResult> ChangePasswordAsAdmin([FromBody] ChangePasswordAdminDTO dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             try
             {
                 await _userService.ChangePasswordAsAdmin(dto);
