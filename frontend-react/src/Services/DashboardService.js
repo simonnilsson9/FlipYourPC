@@ -10,7 +10,7 @@ export const fetchDashboardStats = async () => {
     ]);
 
     // Alla sålda PCs
-    const soldPCsAll = pcsData.filter(pc => pc.isSold);
+    const soldPCsAll = pcsData.filter(pc => pc.status === "Sold");
 
     const salesByMonth = {};
     const profitByMonth = {};

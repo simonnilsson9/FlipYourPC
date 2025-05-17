@@ -4,7 +4,7 @@ import Alert from "../Components/Alert";
 import ImageUploader from "../Components/ImageUploader"; 
 import ComponentTypeEnum, { ComponentTypeTranslations } from "../Components/ComponentTypeEnum";
 import ConfirmDeleteModal from "../Components/ConfirmDeleteModal";
-import { ComputerDesktopIcon, ShoppingCartIcon, ChevronDownIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { WrenchScrewdriverIcon, ShoppingCartIcon, ChevronDownIcon, TrashIcon, TagIcon } from '@heroicons/react/24/solid';
 import {
     getAllPCs,
     createPC,
@@ -18,7 +18,7 @@ import {
 const PCBuilder = () => {
     const [pcs, setPcs] = useState([]);
     const [availableComponents, setAvailableComponents] = useState([]);
-    const [activeTab, setActiveTab] = useState("ongoing");
+    const [activeTab, setActiveTab] = useState("planning");
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showCompListModal, setShowCompListModal] = useState(false);
@@ -34,7 +34,7 @@ const PCBuilder = () => {
     const [listedAt, setListedAt] = useState("");
     const [soldAt, setSoldAt] = useState("");
 
-    const [alert, setAlert] = useState(null); // typ { type, title, message }
+    const [alert, setAlert] = useState(null);
     const [activeAddType, setActiveAddType] = useState(null);
     const [showConfirm, setShowConfirm] = useState(false);
     const [pcToDelete, setPcToDelete] = useState(null);
@@ -265,40 +265,42 @@ const PCBuilder = () => {
             <div className="max-w-5xl mx-auto flex flex-wrap items-center gap-3 mb-8">
                 <button
                     onClick={() => setActiveTab("planning")}
-                    className={`cursor-pointer px-4 py-2 text-sm font-medium rounded-lg transition ${activeTab === "planning"
+                    className={`inline-flex cursor-pointer px-4 py-2 text-sm font-medium rounded-lg transition ${activeTab === "planning"
                         ? "bg-blue-600 text-white"
                         : "bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-600 dark:hover:bg-gray-600 dark:text-white"
                         }`}
                 >
+                    <WrenchScrewdriverIcon className="inline w-5 h-5 mr-1" />
                     Planering ({pcs.filter((p) => p.status === "Planning").length})
                 </button>
 
                 <button
                     onClick={() => setActiveTab("forsale")}
-                    className={`cursor-pointer px-4 py-2 text-sm font-medium rounded-lg transition ${activeTab === "forsale"
+                    className={`inline-flex cursor-pointer px-4 py-2 text-sm font-medium rounded-lg transition ${activeTab === "forsale"
                         ? "bg-blue-600 text-white"
                         : "bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-600 dark:hover:bg-gray-600 dark:text-white"
                         }`}
                 >
-                    Till försäljning ({pcs.filter((p) => p.status === "ForSale").length})
+                    <TagIcon className="inline w-5 h-5 mr-1" />
+                    Till salu ({pcs.filter((p) => p.status === "ForSale").length})
                 </button>
 
                 <button
                     onClick={() => setActiveTab("sold")}
-                    className={`cursor-pointer px-4 py-2 text-sm font-medium rounded-lg transition ${activeTab === "sold"
+                    className={`inline-flex cursor-pointer px-4 py-2 text-sm font-medium rounded-lg transition ${activeTab === "sold"
                             ? "bg-blue-600 text-white"
                             : "bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-600 dark:hover:bg-gray-600 dark:text-white"
                         }`}
                 >
                     <ShoppingCartIcon className="inline w-5 h-5 mr-1" />
-                    Planering ({pcs.filter((p) => p.status === "Sold").length})
+                    Sålda PCs ({pcs.filter((p) => p.status === "Sold").length})
                 </button>
 
                 <button
                     onClick={() => setShowCreateModal(true)}
                     className="ml-auto text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl font-medium rounded-lg text-sm px-5 py-2.5 cursor-pointer"
                 >
-                    + Skapa nytt bygge
+                    + Lägg till PC
                 </button>
             </div>
 
@@ -333,12 +335,21 @@ const PCBuilder = () => {
                                             className={`w-5 h-5 text-gray-500 dark:text-gray-300 transition-transform duration-300 ease-in-out ${expandedPCs.includes(pc.id) ? 'rotate-180' : 'rotate-0'}`}
                                         />
 
-                                        {/* Såld-checkbox */}
+                                        {/* Status-symbol + text */}
                                         <span
-                                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide 
-                                            ${pc.isSold ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}
+                                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide
+                                            ${pc.status === "Sold"
+                                                    ? 'bg-green-100 text-green-700'
+                                                    : pc.status === "ForSale"
+                                                        ? 'bg-yellow-100 text-yellow-700'
+                                                        : 'bg-blue-100 text-blue-700'
+                                                }`}
                                         >
-                                            {pc.isSold ? 'Såld' : 'Ej såld'}
+                                            {pc.status === "Sold"
+                                                ? 'Såld'
+                                                : pc.status === "ForSale"
+                                                    ? 'Till salu'
+                                                    : 'Planering'}
                                         </span>
 
                                         {/* Delete */}
@@ -446,6 +457,15 @@ const PCBuilder = () => {
                                             Redigera Info
                                         </button>
 
+                                        {pc.status === "ForSale" && (
+                                            <button
+                                                onClick={() => handleChangeStatus(pc, "Planning")}
+                                                className="text-white bg-blue-500 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5 cursor-pointer"
+                                            >
+                                                Flytta till planering
+                                            </button>
+                                        )}
+
                                         {pc.status === "Planning" && (
                                             <button
                                                 onClick={() => handleChangeStatus(pc, "ForSale")}
@@ -456,7 +476,7 @@ const PCBuilder = () => {
                                         )}
 
                                         <button
-                                            onClick={() => handleChangeStatus(pc, pc.status === "ForSale" ? "Sold" : "ForSale")}
+                                            onClick={() => handleChangeStatus(pc, pc.status === "Sold" ? "ForSale" : "Sold")}
                                             className={`text-white font-medium rounded-lg text-sm px-5 py-2.5 cursor-pointer transition 
                                                     ${pc.status === "Sold"
                                                     ? 'bg-red-600 hover:bg-red-700'
