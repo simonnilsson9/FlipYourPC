@@ -10,11 +10,20 @@ namespace FlipYourPC.Models
         public List<Component> Components { get; set; }
         public int Price { get; set; }
         public string ImageURL { get; set; }
+        [Obsolete("Använd Status istället.")]
         public bool IsSold { get; set; } = false;
         public Guid UserId { get; set; }
         public User User { get; set; }
         public int ComponentsTotalCost { get; set; } = 0;
         public DateTime ListedAt { get; set; }
         public DateTime? SoldAt { get; set; }
+        public PCStatus Status { get; set; } = PCStatus.Planning; // Default är "Planning"
+    }
+    
+    public enum PCStatus
+    {
+        Planning,
+        Sold,
+        ForSale,
     }
 }

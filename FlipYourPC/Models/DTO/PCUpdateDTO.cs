@@ -14,6 +14,7 @@ namespace FlipYourPC.Models.DTO
         public bool IsSold { get; set; }
         public DateTime ListedAt { get; set; }
         public DateTime? SoldAt { get; set; }
+        public PCStatus Status { get; set; }
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             var errors = new List<ValidationResult>();

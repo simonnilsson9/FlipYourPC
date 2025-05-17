@@ -119,9 +119,9 @@ const PCBuilder = () => {
             description: pcDescription,
             price: parseInt(pcPrice) || 0,
             imageURL: currentPC.imageURL,
-            isSold: currentPC.isSold,
             listedAt: listedAt || currentPC.listedAt,
-            soldAt: soldAt === "" ? null : soldAt
+            soldAt: soldAt === "" ? null : soldAt,
+            status: currentPC.status
         };
 
         const result = await updatePC(currentPC.id, pcUpdateData);
@@ -173,7 +173,7 @@ const PCBuilder = () => {
         }
     };
 
-    const handleToggleSold = async (pc) => {
+    const handleChangeStatus = async (pc, newStatus) => {
         const token = localStorage.getItem("accessToken");
         if (!token) return;
 
@@ -183,15 +183,16 @@ const PCBuilder = () => {
                 description: pc.description,
                 price: pc.price,
                 imageURL: pc.imageURL,
-                isSold: !pc.isSold,
                 listedAt: pc.listedAt,
-                soldAt: !pc.isSold ? new Date().toISOString() : null
-            }, token);            
+                soldAt: newStatus === "Sold" ? new Date().toISOString() : null,
+                status: newStatus
+            }, token);
+
             fetchPCs();
-            showAlert("success", "Uppdaterad", `Datorn har markerats som ${!pc.isSold ? "såld" : "tillbaka i lager"}.`);
+            showAlert("success", "Status ändrad", `Datorn är nu ${newStatus === "Sold" ? "såld" : newStatus === "ForSale" ? "till försäljning" : "i planering"}.`);
         } catch (err) {
-            console.error("Error toggling isSold:", err);
-            showAlert("error", "Fel", "Kunde inte uppdatera säljinformationen.");
+            console.error("Error changing status:", err);
+            showAlert("error", "Fel", "Kunde inte ändra status.");
         }
     };
 
@@ -206,9 +207,9 @@ const PCBuilder = () => {
                 description: pc.description,
                 price: pc.price,
                 imageURL: url,
-                isSold: pc.isSold,
                 listedAt: pc.listedAt,
-                soldAt: pc.soldAt
+                soldAt: pc.soldAt,
+                status: pc.status
             }, token);
 
             fetchPCs();
@@ -228,9 +229,12 @@ const PCBuilder = () => {
     };
 
     // Filtrera pågående vs sålda
-    const filtered = pcs.filter((pc) =>
-        activeTab === "ongoing" ? !pc.isSold : pc.isSold
-    );
+    const filtered = pcs.filter((pc) => {
+        if (activeTab === "sold") return pc.status === "Sold";
+        if (activeTab === "forsale") return pc.status === "ForSale";
+        if (activeTab === "planning") return pc.status === "Planning";
+        return true;
+    });
 
     const showAlert = (type, title, message) => {
         setAlert({ type, title, message });
@@ -260,14 +264,23 @@ const PCBuilder = () => {
             {/* --- Tabbar + Skapa-knapp --- */}
             <div className="max-w-5xl mx-auto flex flex-wrap items-center gap-3 mb-8">
                 <button
-                    onClick={() => setActiveTab("ongoing")}
-                    className={`cursor-pointer px-4 py-2 text-sm font-medium rounded-lg transition ${activeTab === "ongoing"
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-600 dark:hover:bg-gray-600 dark:text-white"
+                    onClick={() => setActiveTab("planning")}
+                    className={`cursor-pointer px-4 py-2 text-sm font-medium rounded-lg transition ${activeTab === "planning"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-600 dark:hover:bg-gray-600 dark:text-white"
                         }`}
                 >
-                    <ComputerDesktopIcon className="inline w-5 h-5 mr-1" />
-                    Pågående byggen ({pcs.filter((p) => !p.isSold).length})
+                    Planering ({pcs.filter((p) => p.status === "Planning").length})
+                </button>
+
+                <button
+                    onClick={() => setActiveTab("forsale")}
+                    className={`cursor-pointer px-4 py-2 text-sm font-medium rounded-lg transition ${activeTab === "forsale"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-600 dark:hover:bg-gray-600 dark:text-white"
+                        }`}
+                >
+                    Till försäljning ({pcs.filter((p) => p.status === "ForSale").length})
                 </button>
 
                 <button
@@ -278,7 +291,7 @@ const PCBuilder = () => {
                         }`}
                 >
                     <ShoppingCartIcon className="inline w-5 h-5 mr-1" />
-                    Sålda byggen ({pcs.filter((p) => p.isSold).length})
+                    Planering ({pcs.filter((p) => p.status === "Sold").length})
                 </button>
 
                 <button
@@ -432,14 +445,24 @@ const PCBuilder = () => {
                                         >
                                             Redigera Info
                                         </button>
+
+                                        {pc.status === "Planning" && (
+                                            <button
+                                                onClick={() => handleChangeStatus(pc, "ForSale")}
+                                                className="text-white bg-blue-500 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5 cursor-pointer"
+                                            >
+                                                Flytta till försäljning
+                                            </button>
+                                        )}
+
                                         <button
-                                            onClick={() => handleToggleSold(pc)}
+                                            onClick={() => handleChangeStatus(pc, pc.status === "ForSale" ? "Sold" : "ForSale")}
                                             className={`text-white font-medium rounded-lg text-sm px-5 py-2.5 cursor-pointer transition 
-                                            ${pc.isSold
+                                                    ${pc.status === "Sold"
                                                     ? 'bg-red-600 hover:bg-red-700'
-                                                    : 'bg-gradient-to-br from-green-500 to-green-700 hover:from-green-600 hover:to-green-800'}`}
+                                                    : 'bg-green-600 hover:bg-green-700'}`}
                                         >
-                                            {pc.isSold ? 'Ångra försäljning' : 'Markera som såld'}
+                                            {pc.status === "Sold" ? 'Ångra försäljning' : 'Markera som såld'}
                                         </button>
                                     </div>
                                 </div>
