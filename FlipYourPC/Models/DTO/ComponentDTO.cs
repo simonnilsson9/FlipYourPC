@@ -16,5 +16,7 @@ namespace FlipYourPC.Models.DTO
         public ComponentType Type { get; set; }
         [StringLength(100, ErrorMessage = "Butik får max vara 100 tecken")]
         public string Store { get; set; }
+        [Required(ErrorMessage = "Skick är obligatoriskt")]
+        public ComponentCondition Condition { get; set; }
     }
 }

@@ -71,7 +71,8 @@ namespace FlipYourPC.Controllers
                 Price = dto.Price,
                 Manufacturer = dto.Manufacturer,
                 Store = dto.Store,
-                Type = dto.Type
+                Type = dto.Type,
+                Condition = dto.Condition
             };
 
             await _componentService.CreateComponentAsync(component);
@@ -96,6 +97,7 @@ namespace FlipYourPC.Controllers
             existingComponent.Manufacturer = dto.Manufacturer;
             existingComponent.Store = dto.Store;
             existingComponent.Type = dto.Type;
+            existingComponent.Condition = dto.Condition;
 
             await _componentService.UpdateComponentAsync(existingComponent);
 

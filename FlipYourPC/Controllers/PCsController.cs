@@ -15,12 +15,10 @@ namespace FlipYourPC.Controllers
     public class PCsController : ControllerBase
     {
         private readonly IPCService _pcService;
-        private readonly IComponentService _componentService;
         private readonly IInventoryService _inventoryService;
-        public PCsController(IPCService PCService, IComponentService componentService, IInventoryService inventoryService)
+        public PCsController(IPCService PCService, IInventoryService inventoryService)
         {
             _pcService = PCService;
-            _componentService = componentService;
             _inventoryService = inventoryService;
         }
 

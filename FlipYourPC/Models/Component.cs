@@ -10,6 +10,7 @@ namespace FlipYourPC.Models
         public required string Manufacturer { get; set; }
         public string Store { get; set; }
         public ComponentType Type { get; set; }
+        public ComponentCondition Condition { get; set; } = ComponentCondition.New;
         [JsonIgnore]
         public Guid? PCId { get; set; } // Foreign key to the PC table
         [JsonIgnore]
@@ -27,5 +28,11 @@ namespace FlipYourPC.Models
         Case,
         CPUCooler,
         Other
+    }
+
+    public enum ComponentCondition
+    {
+        New,
+        Used
     }
 }
