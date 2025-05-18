@@ -4,7 +4,9 @@ import Alert from "../Components/Alert";
 import ImageUploader from "../Components/ImageUploader"; 
 import ComponentTypeEnum, { ComponentTypeTranslations } from "../Components/ComponentTypeEnum";
 import ConfirmDeleteModal from "../Components/ConfirmDeleteModal";
-import { WrenchScrewdriverIcon, ShoppingCartIcon, ChevronDownIcon, TrashIcon, TagIcon } from '@heroicons/react/24/solid';
+import ComponentModal from "../Components/ComponentModal";
+import SalesTextPopup from "../Components/SalesTextPopup";
+import { WrenchScrewdriverIcon, ShoppingCartIcon, ChevronDownIcon, TrashIcon, TagIcon, PencilSquareIcon } from '@heroicons/react/24/solid';
 import {
     getAllPCs,
     createPC,
@@ -13,6 +15,7 @@ import {
     updatePC,
     fetchInventory,
     removeComponentFromPC,
+    saveComponent
 } from "../services/API";
 
 const PCBuilder = () => {
@@ -23,6 +26,8 @@ const PCBuilder = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showCompListModal, setShowCompListModal] = useState(false);
     const [showAddCompModal, setShowAddCompModal] = useState(false);
+    const [editingComponent, setEditingComponent] = useState(null);
+    const [showEditComponentModal, setShowEditComponentModal] = useState(false);
     const [pcFormError, setPcFormError] = useState("");
 
     const [currentPC, setCurrentPC] = useState(null);
@@ -39,6 +44,8 @@ const PCBuilder = () => {
     const [showConfirm, setShowConfirm] = useState(false);
     const [pcToDelete, setPcToDelete] = useState(null);
     const [expandedPCs, setExpandedPCs] = useState([]);
+    const [showSalesTextModal, setShowSalesTextModal] = useState(false);
+    const [salesTextPC, setSalesTextPC] = useState(null);
 
     const navigate = useNavigate();
 
@@ -401,28 +408,42 @@ const PCBuilder = () => {
                                                             <strong>{ComponentTypeTranslations[type] || type}:</strong>{" "}
                                                             {existingComponent ? existingComponent.name : <em>Inget valt</em>}
                                                         </span>
-                                                        {existingComponent ? (
-                                                            <button
-                                                                onClick={() => handleRemoveComponent(pc, existingComponent.id)}
-                                                                className="ml-2 text-xs text-red-500 hover:text-red-700"
-                                                            >
-                                                                Ta bort
-                                                            </button>
-                                                        ) : (
-                                                            <button
-                                                                onClick={() => {
-                                                                    setCurrentPC(pc);
-                                                                    setActiveAddType(type);
-                                                                    setShowAddCompModal(true);
-                                                                }}
-                                                                className="ml-2 text-xs text-blue-500 hover:text-blue-700 cursor-pointer"
-                                                            >
-                                                                Lägg till
-                                                            </button>
-                                                        )}
+                                                        <div className="ml-2 flex gap-2">
+                                                            {existingComponent ? (
+                                                                <>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setEditingComponent(existingComponent);
+                                                                            setShowEditComponentModal(true);
+                                                                        }}
+                                                                        className="text-xs text-yellow-600 hover:text-yellow-800"
+                                                                    >
+                                                                        <PencilSquareIcon className="w-5 h-5 inline" />
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleRemoveComponent(pc, existingComponent.id)}
+                                                                        className="text-xs text-red-500 hover:text-red-700"
+                                                                    >
+                                                                        <TrashIcon className="w-5 h-5 inline" />
+                                                                    </button>                                                                    
+                                                                </>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setCurrentPC(pc);
+                                                                        setActiveAddType(type);
+                                                                        setShowAddCompModal(true);
+                                                                    }}
+                                                                    className="text-xs text-blue-500 hover:text-blue-700 cursor-pointer"
+                                                                >
+                                                                    Lägg till
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 );
                                             })}
+
                                         </div>
 
                                         {/* Prisinfo */}
@@ -438,6 +459,15 @@ const PCBuilder = () => {
                                                     Såld: {new Date(pc.soldAt).toLocaleDateString()}
                                                 </p>
                                             )}
+                                            <button
+                                                onClick={() => {
+                                                    setSalesTextPC(pc);
+                                                    setShowSalesTextModal(true);
+                                                }}
+                                                className="mt-4 px-4 py-2 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white text-sm rounded-lg shadow"
+                                            >
+                                                Generera försäljningstext
+                                            </button>
                                         </div>
                                     </div>
 
@@ -751,7 +781,44 @@ const PCBuilder = () => {
                         </div>
                     </div>
                 </div>
+            )}  
+
+            {showSalesTextModal && salesTextPC && (
+                <SalesTextPopup
+                    pc={salesTextPC}
+                    onClose={() => {
+                        setSalesTextPC(null);
+                        setShowSalesTextModal(false);
+                    }}
+                />
             )}
+
+            <ComponentModal
+                isOpen={showEditComponentModal}
+                component={editingComponent}
+                setComponent={setEditingComponent}
+                onCancel={() => setShowEditComponentModal(false)}
+                onSave={async () => {
+                    try {
+                        const result = await saveComponent({
+                            ...editingComponent,
+                            price: parseInt(editingComponent.price),
+                        });
+
+                        if (result.success) {
+                            fetchPCs();
+                            setShowEditComponentModal(false);
+                            showAlert("success", "Sparad", "Komponenten har uppdaterats.");
+                        } else {
+                            showAlert("error", "Fel", "Misslyckades spara ändring.");
+                        }
+                    } catch {
+                        showAlert("error", "Fel", "Något gick fel.");
+                    }
+                }}
+                modalError={null}
+            />
+
             <ConfirmDeleteModal
                 isOpen={showConfirm}
                 onClose={() => setShowConfirm(false)}

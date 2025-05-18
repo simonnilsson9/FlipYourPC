@@ -8,6 +8,7 @@ import {
 import ComponentTypeEnum, { ComponentTypeTranslations } from "../Components/ComponentTypeEnum";
 import ConfirmDeleteModal from "../Components/ConfirmDeleteModal";
 import Alert from '../Components/Alert';
+import ComponentModal from "../Components/ComponentModal";
 import { ChevronDownIcon, PencilSquareIcon, TrashIcon, CreditCardIcon } from '@heroicons/react/24/solid';
 
 
@@ -73,7 +74,8 @@ const InventoryPage = () => {
             price: 0,
             manufacturer: "",
             store:"",
-            type: ""
+            type: "",
+            condition: "New",
         });
         setShowModal(true);
     };
@@ -211,7 +213,8 @@ const InventoryPage = () => {
                                             <th className="w-1/5">Tillverkare</th>
                                             <th className="w-1/5">Värde</th>
                                             <th className="w-1/5">Butik</th>
-                                            <th className="w-1/20">Åtgärder</th>
+                                            <th className="w-1/6">Skick</th>
+                                            <th className="w-1/17">Åtgärder</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -221,6 +224,7 @@ const InventoryPage = () => {
                                                 <td>{comp.manufacturer}</td>
                                                 <td>{comp.price} kr</td>
                                                 <td>{comp.store || "-"}</td>
+                                                <td>{comp.condition === "Used" ? "Begagnad" : "Ny"}</td>
                                                 <td className="space-x-2">
                                                     <button
                                                         onClick={() => handleEditComponent(comp)}
@@ -244,100 +248,14 @@ const InventoryPage = () => {
                     </div>
                 ))
             )}
-
-
-            {/* Modal */}
-            {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-lg p-6">
-                        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-                            {currentComponent?.id ? "Redigera komponent" : "Lägg till komponent"}
-                        </h2>
-                        {modalError &&(
-                            <div className="mb-4 text-sm text-red-600 dark:text-red-400">
-                                {modalError}
-                            </div>
-                        )}
-
-                        {/* Typ */}
-                        <div className="mb-6">
-                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Typ av komponent</label>
-                            <select
-                                value={currentComponent?.type || ""}
-                                onChange={(e) => setCurrentComponent({ ...currentComponent, type: e.target.value })}
-                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
-                            >
-                                <option value="">Välj typ</option>
-                                {Object.values(ComponentTypeEnum).map((type) => (
-                                    <option key={type} value={type}>
-                                        {ComponentTypeTranslations[type] || type}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* Namn */}
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Namn</label>
-                            <input
-                                type="text"
-                                value={currentComponent?.name || ""}
-                                onChange={(e) => setCurrentComponent({ ...currentComponent, name: e.target.value })}
-                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
-                            />
-                        </div>
-
-                        {/* Tillverkare */}
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Tillverkare</label>
-                            <input
-                                type="text"
-                                value={currentComponent?.manufacturer || ""}
-                                onChange={(e) => setCurrentComponent({ ...currentComponent, manufacturer: e.target.value })}
-                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
-                            />
-                        </div>
-
-                        {/* Pris */}
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Pris (kr)</label>
-                            <input
-                                type="number"
-                                value={currentComponent?.price || ""}
-                                onChange={(e) => setCurrentComponent({ ...currentComponent, price: e.target.value })}
-                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
-                            />
-                        </div>
-
-                        {/* Butik */}
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Butik</label>
-                            <input
-                                type="text"
-                                value={currentComponent?.store || ""}
-                                onChange={(e) => setCurrentComponent({ ...currentComponent, store: e.target.value })}
-                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
-                            />
-                        </div>                        
-
-                        {/* Actionknappar */}
-                        <div className="flex justify-end space-x-2">
-                            <button
-                                onClick={() => setShowModal(false)}
-                                className="px-4 py-2 text-sm bg-gray-500 hover:bg-gray-700 rounded dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
-                            >
-                                Avbryt
-                            </button>
-                            <button
-                                onClick={handleSave}
-                                className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded"
-                            >
-                                Spara
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <ComponentModal
+                isOpen={showModal}
+                component={currentComponent}
+                setComponent={setCurrentComponent}
+                onSave={handleSave}
+                onCancel={() => setShowModal(false)}
+                modalError={modalError}
+            />
             <ConfirmDeleteModal
                 isOpen={showConfirm}
                 onClose={() => setShowConfirm(false)}
