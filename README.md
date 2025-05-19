@@ -1,6 +1,5 @@
-# 💻 FlipYourPC
+# 💻 FlipYourPC - https://flipyourpcs.com
 
-**[flipyourpcs.com](https://flipyourpcs.com
 FlipYourPC är en komplett webbaserad lösning för att hantera, bygga och sälja återbrukade datorer. Systemet erbjuder inventariehantering, PC-byggen, försäljningsstatus och exportfunktioner – skräddarsytt för PC-flipping!
 
 ## 🚀 Funktioner
