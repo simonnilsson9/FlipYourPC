@@ -397,12 +397,6 @@ export const exportPCs = async () => {
         throw new Error("Exportmisslyckande");
     }
 
-    // Läs filen som blob och ladda ner
     const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "pcs-export.xlsx";
-    link.click();
-    window.URL.revokeObjectURL(url);
-};
+    return blob;
+}

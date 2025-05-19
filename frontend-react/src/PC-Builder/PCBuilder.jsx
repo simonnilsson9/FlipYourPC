@@ -306,7 +306,7 @@ const PCBuilder = () => {
 
                 <button
                     onClick={() => setShowCreateModal(true)}
-                    className="ml-auto flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg text-sm"
+                    className="ml-auto flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg text-sm cursor-pointer"
                 >
                     <PlusIcon className="w-5 h-5" />
                     Ny PC
