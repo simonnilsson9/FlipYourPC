@@ -3,13 +3,14 @@ import { useNavigate, Link } from "react-router-dom";
 import {
     fetchInventory,
     deleteComponent,
-    saveComponent
+    saveComponent,
 } from "../services/API";
 import ComponentTypeEnum, { ComponentTypeTranslations } from "../Components/ComponentTypeEnum";
 import ConfirmDeleteModal from "../Components/ConfirmDeleteModal";
 import Alert from '../Components/Alert';
 import ComponentModal from "../Components/ComponentModal";
-import { ChevronDownIcon, PencilSquareIcon, TrashIcon, CreditCardIcon } from '@heroicons/react/24/solid';
+import ExportInventory from "../Export/ExportInventory";
+import { ChevronDownIcon, PencilSquareIcon, TrashIcon, CreditCardIcon, PlusIcon } from '@heroicons/react/24/solid';
 
 
 const InventoryPage = () => {
@@ -170,19 +171,14 @@ const InventoryPage = () => {
                     </div>
                 </div>
                 <div className="flex gap-2 items-center">
-                    <input
-                        type="text"
-                        placeholder="Sök komponent..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="px-4 py-2 rounded bg-gray-100 dark:bg-gray-700 text-sm text-gray-900 dark:text-white"
-                    />
                     <button
                         onClick={handleAddComponent}
-                        className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl text-white rounded-lg hover:bg-blue-700 cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg text-sm"
                     >
-                        + Lägg till komponent
+                        <PlusIcon className="w-5 h-5" />
+                        Lägg till komponent
                     </button>
+                    <ExportInventory />
                 </div>
             </div>
 

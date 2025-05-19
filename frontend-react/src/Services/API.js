@@ -367,3 +367,42 @@ export const changePasswordAsAdmin = async (data) => {
         data: responseData
     };
 };
+
+export const exportInventory = async () => {
+    const res = await fetch(`${API_URL}/export/export-excel`, {
+        headers: {
+            "Authorization": `Bearer ${token()}`
+        }
+    });
+
+    if (!res.ok) {
+        throw new Error("Kunde inte hämta exportfilen.");
+    }
+
+    const blob = await res.blob();
+    return blob;
+};
+
+export const exportPCs = async () => {
+    const token = localStorage.getItem("accessToken");
+
+    const response = await fetch(`${API_URL}/export/export-pcs`, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error("Exportmisslyckande");
+    }
+
+    // Läs filen som blob och ladda ner
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "pcs-export.xlsx";
+    link.click();
+    window.URL.revokeObjectURL(url);
+};

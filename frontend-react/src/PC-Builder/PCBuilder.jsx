@@ -6,7 +6,8 @@ import ComponentTypeEnum, { ComponentTypeTranslations } from "../Components/Comp
 import ConfirmDeleteModal from "../Components/ConfirmDeleteModal";
 import ComponentModal from "../Components/ComponentModal";
 import SalesTextPopup from "../Components/SalesTextPopup";
-import { WrenchScrewdriverIcon, ShoppingCartIcon, ChevronDownIcon, TrashIcon, TagIcon, PencilSquareIcon } from '@heroicons/react/24/solid';
+import ExportPCs from "../Export/ExportPCs";
+import { WrenchScrewdriverIcon, ShoppingCartIcon, ChevronDownIcon, TrashIcon, TagIcon, PencilSquareIcon, PlusIcon } from '@heroicons/react/24/solid';
 import {
     getAllPCs,
     createPC,
@@ -305,10 +306,12 @@ const PCBuilder = () => {
 
                 <button
                     onClick={() => setShowCreateModal(true)}
-                    className="ml-auto text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl font-medium rounded-lg text-sm px-5 py-2.5 cursor-pointer"
+                    className="ml-auto flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg text-sm"
                 >
-                    + Lägg till PC
+                    <PlusIcon className="w-5 h-5" />
+                    Ny PC
                 </button>
+                <ExportPCs />
             </div>
 
             {/* --- Kort­grid --- */}
@@ -824,7 +827,7 @@ const PCBuilder = () => {
                 onClose={() => setShowConfirm(false)}
                 onConfirm={confirmDeletePC}
                 message={`Vill du verkligen radera bygget "${pcToDelete?.name}"?`}
-            />
+            />            
         </div>
     );
 };
