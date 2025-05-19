@@ -26,6 +26,6 @@ namespace FlipYourPC.Controllers
             }
             return Ok(inventory);
         }
-        
+
     }
 }
