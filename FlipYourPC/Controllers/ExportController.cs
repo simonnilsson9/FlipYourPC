@@ -90,13 +90,29 @@ namespace FlipYourPC.Controllers
 
         [Authorize(Roles = "Användare, Admin")]
         [HttpGet("export-pcs")]
-        public async Task<IActionResult> ExportPCsAsExcel()
+        public async Task<IActionResult> ExportPCsAsExcel([FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate, [FromQuery] string? statuses)
         {
             var pcs = await _pcService.GetAllPCsAsync();
 
             if (!pcs.Any() || pcs == null)
             {
                 return NotFound("Inga PC-Byggen att exportera.");
+            }
+
+            if (fromDate.HasValue)
+                pcs = pcs.Where(pc => pc.ListedAt >= fromDate.Value);
+            if (toDate.HasValue)
+                pcs = pcs.Where(pc => pc.ListedAt <= toDate.Value);
+
+            if (!string.IsNullOrWhiteSpace(statuses))
+            {
+                var statusList = statuses.Split(',')
+                                         .Select(s => s.Trim())
+                                         .Where(s => Enum.TryParse<PCStatus>(s, out _))
+                                         .Select(Enum.Parse<PCStatus>)
+                                         .ToList();
+
+                pcs = pcs.Where(pc => statusList.Contains(pc.Status));
             }
 
             using var workbook = new XLWorkbook();
