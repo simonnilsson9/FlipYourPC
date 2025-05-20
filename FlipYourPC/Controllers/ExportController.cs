@@ -107,10 +107,10 @@ namespace FlipYourPC.Controllers
             if (!string.IsNullOrWhiteSpace(statuses))
             {
                 var statusList = statuses.Split(',')
-                                         .Select(s => s.Trim())
-                                         .Where(s => Enum.TryParse<PCStatus>(s, out _))
-                                         .Select(Enum.Parse<PCStatus>)
-                                         .ToList();
+                                            .Select(s => s.Trim())
+                                            .Where(s => Enum.TryParse<PCStatus>(s, true, out _))
+                                            .Select(s => Enum.Parse<PCStatus>(s, true))
+                                            .ToList();
 
                 pcs = pcs.Where(pc => statusList.Contains(pc.Status));
             }
