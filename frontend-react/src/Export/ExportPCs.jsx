@@ -14,6 +14,10 @@ const ExportPCs = () => {
     const [toDate, setToDate] = useState("");
     const [alert, setAlert] = useState(null);
 
+    const currentYear = new Date().getFullYear();
+    const today = new Date().toISOString().split("T")[0];
+    const januaryFirst = `${currentYear}-01-01`;
+
     const handleExport = async () => {
         const queryParams = new URLSearchParams();
 
@@ -85,8 +89,9 @@ const ExportPCs = () => {
                             <input
                                 type="date"
                                 className="w-full px-3 py-2 border rounded bg-gray-50 dark:bg-gray-700 dark:text-white"
-                                value={fromDate}
+                                value={fromDate || januaryFirst}
                                 onChange={e => setFromDate(e.target.value)}
+                                placeholder={januaryFirst}
                             />
                         </div>
                         <div className="mb-4">
@@ -94,8 +99,9 @@ const ExportPCs = () => {
                             <input
                                 type="date"
                                 className="w-full px-3 py-2 border rounded bg-gray-50 dark:bg-gray-700 dark:text-white"
-                                value={toDate}
+                                value={toDate || today}
                                 onChange={e => setToDate(e.target.value)}
+                                placeholder={today}
                             />
                         </div>
                         <div className="mb-4">
