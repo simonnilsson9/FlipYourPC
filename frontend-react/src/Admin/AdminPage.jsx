@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getAllUsers, updateUserRole, updateUserAsAdmin, deleteUser, changePasswordAsAdmin } from '../services/API';
 import Alert from '../Components/Alert';
+import ConfirmDeleteModal from "../Components/ConfirmDeleteModal";
 import { PencilSquareIcon, TrashIcon, EyeIcon, EyeSlashIcon, LockOpenIcon } from '@heroicons/react/24/solid';
 
 const AdminPage = () => {
@@ -11,6 +12,8 @@ const AdminPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [alert, setAlert] = useState(null);
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [userToDelete, setUserToDelete] = useState(null);
 
     const [editUser, setEditUser] = useState(null);
     const [editForm, setEditForm] = useState({
@@ -78,6 +81,7 @@ const AdminPage = () => {
         }
     };
 
+
     const handleEditClick = (user) => {
         setEditUser(user);
         setEditForm({
@@ -103,16 +107,22 @@ const AdminPage = () => {
         }
     };
 
-    const handleDeleteUser = async (user) => {
-        if (window.confirm(`Vill du verkligen ta bort användaren ${user.username}?`)) {
-            try {
-                await deleteUser(user.id);
-                setUsers(prev => prev.filter(u => u.id !== user.id));
-                showAlert("success", "Borttagen", "Användaren är raderad.");
-            } catch (err) {
-                showAlert("error", "Fel", "Kunde inte ta bort användaren.");
-            }
+    const confirmDeleteUser = async () => {
+        try {
+            await deleteUser(userToDelete.id);
+            setUsers(prev => prev.filter(u => u.id !== userToDelete.id));
+            showAlert("success", "Borttagen", "Användaren är raderad.");
+        } catch (err) {
+            showAlert("error", "Fel", "Kunde inte ta bort användaren.");
+        } finally {
+            setShowConfirm(false);
+            setUserToDelete(null);
         }
+    };
+
+    const handleDeleteUser = (user) => {
+        setUserToDelete(user);
+        setShowConfirm(true);
     };
 
     const handleChangePassword = async () => {
@@ -171,53 +181,58 @@ const AdminPage = () => {
                 </h1>
             </div>
 
-            <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <div className="max-w-5xl sm:mx-auto mx-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
                 <table className="w-full text-sm text-left">
                     <thead>
-                        <tr className="border-b border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400">
-                            <th className="py-2">Användarnamn</th>
-                            <th>Email</th>
-                            <th>Roll</th>
-                            <th>Åtgärder</th>
+                        <tr className="border-b border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
+                            <th className="py-2 w-1/4">Användarnamn</th>
+                            <th className="hidden sm:table-cell w-1/4">E-post</th>
+                            <th className="w-1/4">Roll</th>
+                            <th className="w-1/4 text-right">Åtgärder</th>
                         </tr>
                     </thead>
                     <tbody>
                         {users.map((user) => (
-                            <tr key={user.id} className="text-gray-800 dark:text-gray-200">
-                                <td className="py-2">{user.username}</td>
-                                <td>{user.email}</td>
+                            <tr key={user.id} className="text-gray-800 dark:text-gray-200 text-xs sm:text-sm">
+                                <td className="py-2 truncate max-w-[140px]">{user.username}</td>
+
+                                <td className="hidden sm:table-cell">{user.email}</td>
+
                                 <td>
                                     <select
                                         value={user.role}
                                         onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                                        className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white px-4 py-2 rounded-lg min-w-[160px] text-sm mb-1 mt-2"
+                                        className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white px-2 py-1 rounded-lg text-xs sm:text-sm w-full"
                                     >
                                         <option value="Admin">Admin</option>
                                         <option value="Användare">Användare</option>
                                     </select>
                                 </td>
-                                <td className="space-x-2">
-                                    <button
-                                        onClick={() => setPasswordModalUser(user)}
-                                        title="Ändra lösenord"
-                                        className="text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300"
-                                    >
-                                        <LockOpenIcon className="w-5 h-5 inline" />
-                                    </button>
-                                    <button
-                                        onClick={() => handleEditClick(user)}
-                                        title="Redigera användare"
-                                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                                    >
-                                        <PencilSquareIcon className="w-5 h-5 inline" />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDeleteUser(user)}
-                                        title="Radera användare"
-                                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                                    >
-                                        <TrashIcon className="w-5 h-5 inline" />
-                                    </button>
+
+                                <td className="py-1">
+                                    <div className="flex justify-end items-center gap-1 sm:gap-2">
+                                        <button
+                                            onClick={() => setPasswordModalUser(user)}
+                                            title="Ändra lösenord"
+                                            className="text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300"
+                                        >
+                                            <LockOpenIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                                        </button>
+                                        <button
+                                            onClick={() => handleEditClick(user)}
+                                            title="Redigera användare"
+                                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                                        >
+                                            <PencilSquareIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteUser(user)}
+                                            title="Radera användare"
+                                            className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                                        >
+                                            <TrashIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -325,6 +340,15 @@ const AdminPage = () => {
                     </div>
                 </div>
             )}
+            <ConfirmDeleteModal
+                isOpen={showConfirm}
+                onClose={() => {
+                    setShowConfirm(false);
+                    setUserToDelete(null);
+                }}
+                onConfirm={confirmDeleteUser}
+                message={`Vill du verkligen ta bort användaren "${userToDelete?.username}"?`}
+            />
         </div>
     );
 };

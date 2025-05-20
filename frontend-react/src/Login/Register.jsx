@@ -51,7 +51,7 @@ const Register = () => {
     };
 
     return (
-        <div className="flex justify-center items-start pt-30 sm:pt-68 min-h-[70vh] bg-gray-100 dark:bg-gray-900 px-4">
+        <div className="flex justify-center items-start pt-24 sm:pt-68 min-h-[70vh] bg-gray-100 dark:bg-gray-900 px-4">
             <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-8 max-w-md w-full">
                 <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-white mb-4">
                     Registrera konto

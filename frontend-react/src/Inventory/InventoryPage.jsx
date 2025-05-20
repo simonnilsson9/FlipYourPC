@@ -10,7 +10,7 @@ import ConfirmDeleteModal from "../Components/ConfirmDeleteModal";
 import Alert from '../Components/Alert';
 import ComponentModal from "../Components/ComponentModal";
 import ExportInventory from "../Export/ExportInventory";
-import { ChevronDownIcon, PencilSquareIcon, TrashIcon, CreditCardIcon, PlusIcon } from '@heroicons/react/24/solid';
+import { ChevronDownIcon, PencilSquareIcon, TrashIcon, CreditCardIcon, PlusIcon, DocumentDuplicateIcon } from '@heroicons/react/24/solid';
 
 
 const InventoryPage = () => {
@@ -44,6 +44,22 @@ const InventoryPage = () => {
         setShowConfirm(false);
         setComponentToDelete(null);
     };
+
+    const handleDuplicateComponent = async (component) => {
+        try {
+            const newComponent = { ...component };
+            delete newComponent.id; // ta bort id så det genereras nytt
+            const result = await saveComponent(newComponent);
+            if (result.success) {
+                loadInventory();
+                setAlert({ type: "default", title: "Duplicerad", message: "Komponenten har duplicerats." });
+            } else {
+                setAlert({ type: "error", title: "Fel", message: "Kunde inte duplicera komponenten." });
+            }
+        } catch (err) {
+            setAlert({ type: "error", title: "Fel", message: "Ett fel uppstod vid duplicering." });
+        }
+    }
 
     const loadInventory = async () => {
         try {
@@ -202,38 +218,37 @@ const InventoryPage = () => {
 
                         <div className={`px-4 overflow-hidden transition-all duration-500 ease-in-out ${openSections.includes(type) ? 'max-h-[1000px] pb-4' : 'max-h-0'}`}>
                             {openSections.includes(type) && (
-                                <table className="w-full text-sm text-left mt-2 table-fixed">
+                                <table className="w-full table-fixed text-sm text-left mt-2">
                                     <thead>
-                                        <tr className="border-b border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400">
-                                            <th className="py-2 w-1/4">Namn</th>
-                                            <th className="w-1/5">Tillverkare</th>
-                                            <th className="w-1/5">Värde</th>
-                                            <th className="w-1/5">Butik</th>
-                                            <th className="w-1/6">Skick</th>
-                                            <th className="w-1/17">Åtgärder</th>
+                                        <tr className="border-b border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
+                                            <th className="w-[25%] px-2 py-2">Namn</th>
+                                            <th className="w-[15%] px-2 py-2 hidden sm:table-cell">Tillverkare</th>
+                                            <th className="w-[15%] px-2 py-2">Värde</th>
+                                            <th className="w-[15%] px-2 py-2 hidden sm:table-cell">Butik</th>
+                                            <th className="w-[15%] px-2 py-2">Skick</th>
+                                            <th className="w-[15%] px-2 py-2 pr-4 text-right">Åtgärder</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {comps.map((comp) => (
-                                            <tr key={comp.id} className="text-gray-800 dark:text-gray-200">
-                                                <td className="py-2">{comp.name}</td>
-                                                <td>{comp.manufacturer}</td>
-                                                <td>{comp.price} kr</td>
-                                                <td>{comp.store || "-"}</td>
-                                                <td>{comp.condition === "Used" ? "Begagnad" : "Ny"}</td>
-                                                <td className="space-x-2">
-                                                    <button
-                                                        onClick={() => handleEditComponent(comp)}
-                                                        className="text-white-500 hover:text-gray-500 cursor-pointer"
-                                                    >
-                                                        <PencilSquareIcon className="w-5 h-5 inline" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => requestDelete(comp.id)}
-                                                        className="text-red-500 hover:text-red-700 cursor-pointer"
-                                                    >
-                                                        <TrashIcon className="w-5 h-5 inline" />
-                                                    </button>
+                                            <tr key={comp.id} className="text-gray-800 dark:text-gray-200 text-xs sm:text-sm">
+                                                <td className="px-2 py-2 truncate">{comp.name}</td>
+                                                <td className="px-2 py-2 hidden sm:table-cell">{comp.manufacturer}</td>
+                                                <td className="px-2 py-2">{comp.price} kr</td>
+                                                <td className="px-2 py-2 hidden sm:table-cell">{comp.store || "-"}</td>
+                                                <td className="px-2 py-2">{comp.condition === "Used" ? "Begagnad" : "Ny"}</td>
+                                                <td className="px-2 py-2">
+                                                    <div className="flex justify-end gap-2">
+                                                        <button onClick={() => handleEditComponent(comp)} className="text-gray-500 hover:text-gray-700 dark:text-white dark:hover:text-gray-300" title="Redigera">
+                                                            <PencilSquareIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                                                        </button>
+                                                        <button onClick={() => handleDuplicateComponent(comp)} className="text-blue-500 hover:text-blue-700" title="Duplicera">
+                                                            <DocumentDuplicateIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                                                        </button>
+                                                        <button onClick={() => requestDelete(comp.id)} className="text-red-500 hover:text-red-700" title="Radera">
+                                                            <TrashIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
