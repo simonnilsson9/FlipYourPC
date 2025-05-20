@@ -383,10 +383,10 @@ export const exportInventory = async () => {
     return blob;
 };
 
-export const exportPCs = async () => {
+export const exportPCs = async (queryString = "") => {
     const token = localStorage.getItem("accessToken");
 
-    const response = await fetch(`${API_URL}/export/export-pcs`, {
+    const response = await fetch(`${API_URL}/export/export-pcs?${queryString}`, {
         method: "GET",
         headers: {
             Authorization: `Bearer ${token}`
@@ -399,4 +399,4 @@ export const exportPCs = async () => {
 
     const blob = await response.blob();
     return blob;
-}
+};
