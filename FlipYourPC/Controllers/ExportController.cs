@@ -90,14 +90,16 @@ namespace FlipYourPC.Controllers
 
         [Authorize(Roles = "Användare, Admin")]
         [HttpGet("export-pcs")]
-        public async Task<IActionResult> ExportPCsAsExcel([FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate, [FromQuery] string? statuses)
+        public async Task<IActionResult> ExportPCsAsExcel(
+        [FromQuery] DateTime? fromDate,
+        [FromQuery] DateTime? toDate,
+        [FromQuery] string? statuses,
+        [FromQuery] bool singleSheet = false)
         {
             var pcs = await _pcService.GetAllPCsAsync();
 
-            if (!pcs.Any() || pcs == null)
-            {
+            if (!pcs.Any())
                 return NotFound("Inga PC-Byggen att exportera.");
-            }
 
             if (fromDate.HasValue)
                 pcs = pcs.Where(pc => pc.ListedAt >= fromDate.Value);
@@ -107,53 +109,93 @@ namespace FlipYourPC.Controllers
             if (!string.IsNullOrWhiteSpace(statuses))
             {
                 var statusList = statuses.Split(',')
-                                            .Select(s => s.Trim())
-                                            .Where(s => Enum.TryParse<PCStatus>(s, true, out _))
-                                            .Select(s => Enum.Parse<PCStatus>(s, true))
-                                            .ToList();
+                    .Select(s => s.Trim())
+                    .Where(s => Enum.TryParse<PCStatus>(s, true, out _))
+                    .Select(s => Enum.Parse<PCStatus>(s, true))
+                    .ToList();
 
                 pcs = pcs.Where(pc => statusList.Contains(pc.Status));
             }
 
             using var workbook = new XLWorkbook();
 
-            foreach (var pc in pcs)
+            if (singleSheet)
             {
-                var worksheet = workbook.Worksheets.Add(pc.Name.Length > 31 ? pc.Name[..31] : pc.Name);
+                var sheet = workbook.Worksheets.Add("Alla PCs");
                 int row = 1;
 
-                // Titel
-                worksheet.Cell(row++, 1).Value = $"PC: {pc.Name}";
-
-                // Rubriker för komponentlistan
-                worksheet.Cell(row, 1).Value = "Typ";
-                worksheet.Cell(row, 2).Value = "Namn";
-                worksheet.Cell(row, 3).Value = "Tillverkare";
-                worksheet.Cell(row, 4).Value = "Inköpspris";
-                worksheet.Cell(row, 5).Value = "Skick";
-                worksheet.Cell(row, 6).Value = "Butik";
-                row++;
-
-                foreach (var comp in pc.Components.OrderBy(c => c.Type.ToString()))
+                foreach (var pc in pcs)
                 {
-                    worksheet.Cell(row, 1).Value = TranslateComponentType(comp.Type);
-                    worksheet.Cell(row, 2).Value = comp.Name;
-                    worksheet.Cell(row, 3).Value = comp.Manufacturer;
-                    worksheet.Cell(row, 4).Value = comp.Price;
-                    worksheet.Cell(row, 5).Value = comp.Condition == ComponentCondition.New ? "Ny" : "Begagnad";
-                    worksheet.Cell(row, 6).Value = comp.Store ?? "-";
+                    sheet.Cell(row++, 1).Value = $"PC: {pc.Name}";
+
+                    sheet.Cell(row, 1).Value = "Typ";
+                    sheet.Cell(row, 2).Value = "Namn";
+                    sheet.Cell(row, 3).Value = "Tillverkare";
+                    sheet.Cell(row, 4).Value = "Inköpspris";
+                    sheet.Cell(row, 5).Value = "Skick";
+                    sheet.Cell(row, 6).Value = "Butik";
                     row++;
+
+                    foreach (var comp in pc.Components.OrderBy(c => c.Type.ToString()))
+                    {
+                        sheet.Cell(row, 1).Value = TranslateComponentType(comp.Type);
+                        sheet.Cell(row, 2).Value = comp.Name;
+                        sheet.Cell(row, 3).Value = comp.Manufacturer;
+                        sheet.Cell(row, 4).Value = comp.Price;
+                        sheet.Cell(row, 5).Value = comp.Condition == ComponentCondition.New ? "Ny" : "Begagnad";
+                        sheet.Cell(row, 6).Value = comp.Store ?? "-";
+                        row++;
+                    }
+
+                    // Sammanfattning
+                    row++;
+                    sheet.Cell(row++, 1).Value = $"💰 Säljpris: {pc.Price} kr";
+                    sheet.Cell(row++, 1).Value = $"💸 Totalkostnad: {pc.ComponentsTotalCost} kr";
+                    sheet.Cell(row++, 1).Value = $"📈 Vinst: {pc.Price - pc.ComponentsTotalCost} kr";
+                    sheet.Cell(row++, 1).Value = $"📅 Listad: {pc.ListedAt:yyyy-MM-dd}";
+                    sheet.Cell(row++, 1).Value = $"✅ Såld: {(pc.SoldAt.HasValue ? pc.SoldAt.Value.ToString("yyyy-MM-dd") : "-")}";
+
+                    row += 2; // Space between PCs
                 }
 
-                // Tom rad + sammanfattning
-                row++;
-                worksheet.Cell(row++, 1).Value = $"💰 Säljpris: {pc.Price} kr";
-                worksheet.Cell(row++, 1).Value = $"💸 Totalkostnad: {pc.ComponentsTotalCost} kr";
-                worksheet.Cell(row++, 1).Value = $"📈 Vinst: {pc.Price - pc.ComponentsTotalCost} kr";
-                worksheet.Cell(row++, 1).Value = $"📅 Listad: {pc.ListedAt:yyyy-MM-dd}";
-                worksheet.Cell(row++, 1).Value = $"✅ Såld: {(pc.SoldAt.HasValue ? pc.SoldAt.Value.ToString("yyyy-MM-dd") : "-")}";
+                sheet.Columns().AdjustToContents();
+            }
+            else
+            {
+                foreach (var pc in pcs)
+                {
+                    var sheet = workbook.Worksheets.Add(pc.Name.Length > 31 ? pc.Name[..31] : pc.Name);
+                    int row = 1;
 
-                worksheet.Columns().AdjustToContents();
+                    sheet.Cell(row++, 1).Value = $"PC: {pc.Name}";
+                    sheet.Cell(row, 1).Value = "Typ";
+                    sheet.Cell(row, 2).Value = "Namn";
+                    sheet.Cell(row, 3).Value = "Tillverkare";
+                    sheet.Cell(row, 4).Value = "Inköpspris";
+                    sheet.Cell(row, 5).Value = "Skick";
+                    sheet.Cell(row, 6).Value = "Butik";
+                    row++;
+
+                    foreach (var comp in pc.Components.OrderBy(c => c.Type.ToString()))
+                    {
+                        sheet.Cell(row, 1).Value = TranslateComponentType(comp.Type);
+                        sheet.Cell(row, 2).Value = comp.Name;
+                        sheet.Cell(row, 3).Value = comp.Manufacturer;
+                        sheet.Cell(row, 4).Value = comp.Price;
+                        sheet.Cell(row, 5).Value = comp.Condition == ComponentCondition.New ? "Ny" : "Begagnad";
+                        sheet.Cell(row, 6).Value = comp.Store ?? "-";
+                        row++;
+                    }
+
+                    row++;
+                    sheet.Cell(row++, 1).Value = $"💰 Säljpris: {pc.Price} kr";
+                    sheet.Cell(row++, 1).Value = $"💸 Totalkostnad: {pc.ComponentsTotalCost} kr";
+                    sheet.Cell(row++, 1).Value = $"📈 Vinst: {pc.Price - pc.ComponentsTotalCost} kr";
+                    sheet.Cell(row++, 1).Value = $"📅 Listad: {pc.ListedAt:yyyy-MM-dd}";
+                    sheet.Cell(row++, 1).Value = $"✅ Såld: {(pc.SoldAt.HasValue ? pc.SoldAt.Value.ToString("yyyy-MM-dd") : "-")}";
+
+                    sheet.Columns().AdjustToContents();
+                }
             }
 
             using var stream = new MemoryStream();
@@ -165,6 +207,6 @@ namespace FlipYourPC.Controllers
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 "pcs-export.xlsx"
             );
-        }     
+        }
     }
 }
