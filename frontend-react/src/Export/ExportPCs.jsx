@@ -13,6 +13,8 @@ const ExportPCs = () => {
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
     const [alert, setAlert] = useState(null);
+    const [singleSheet, setSingleSheet] = useState(false);
+
 
     const currentYear = new Date().getFullYear();
     const today = new Date().toISOString().split("T")[0];
@@ -28,6 +30,10 @@ const ExportPCs = () => {
         const selectedStatuses = Object.keys(statuses).filter(status => statuses[status]);
         if (selectedStatuses.length > 0) {
             queryParams.append("statuses", selectedStatuses.join(","));
+        }
+
+        if (singleSheet) {
+            queryParams.append("singleSheet", "true");
         }
 
         try {
@@ -117,6 +123,17 @@ const ExportPCs = () => {
                                     {status === "Planning" ? "Planering" : status === "ForSale" ? "Till salu" : "Såld"}
                                 </label>
                             ))}
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                                <input
+                                    type="checkbox"
+                                    checked={singleSheet}
+                                    onChange={() => setSingleSheet(!singleSheet)}
+                                    className="mr-2"
+                                />
+                                Samla alla PCs i en flik
+                            </label>
                         </div>
 
                         <div className="flex justify-end gap-2">
