@@ -7,7 +7,7 @@ import ConfirmDeleteModal from "../Components/ConfirmDeleteModal";
 import ComponentModal from "../Components/ComponentModal";
 import SalesTextPopup from "../Components/SalesTextPopup";
 import ExportPCs from "../Export/ExportPCs";
-import { WrenchScrewdriverIcon, ShoppingCartIcon, ChevronDownIcon, TrashIcon, TagIcon, PencilSquareIcon, PlusIcon } from '@heroicons/react/24/solid';
+import { WrenchScrewdriverIcon, ShoppingCartIcon, ChevronDownIcon, TrashIcon, TagIcon, PencilSquareIcon, PlusIcon, EllipsisVerticalIcon, DocumentTextIcon, ArrowUturnLeftIcon, CurrencyDollarIcon } from '@heroicons/react/24/solid';
 import {
     getAllPCs,
     createPC,
@@ -47,16 +47,26 @@ const PCBuilder = () => {
     const [expandedPCs, setExpandedPCs] = useState([]);
     const [showSalesTextModal, setShowSalesTextModal] = useState(false);
     const [salesTextPC, setSalesTextPC] = useState(null);
+    const [pcListPrice, setPcListPrice] = useState("");
 
     const [currentPage, setCurrentPage] = useState(1);
     const pcsPerPage = 6; // Antal datorer per sida (justerbart)
 
     const navigate = useNavigate();
 
+    const [showMenuId, setShowMenuId] = useState(null);
+    const toggleMenu = (id) => {
+        setShowMenuId(prev => prev === id ? null : id);
+    };
+
     useEffect(() => {
         fetchPCs();
         fetchComponents();
     }, []);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [activeTab]);
 
     const togglePCSection = (id) => {
         setExpandedPCs(prev =>
@@ -132,7 +142,8 @@ const PCBuilder = () => {
             imageURL: currentPC.imageURL,
             listedAt: listedAt || currentPC.listedAt,
             soldAt: soldAt === "" ? null : soldAt,
-            status: currentPC.status
+            status: currentPC.status, 
+            listPrice: parseInt(pcListPrice)
         };
 
         const result = await updatePC(currentPC.id, pcUpdateData);
@@ -338,6 +349,7 @@ const PCBuilder = () => {
                                     onClick={() => togglePCSection(pc.id)}
                                     className="flex items-center justify-between cursor-pointer rounded-lg p-2 transition"
                                 >
+                                    {/* Vänster: Ikon + Namn */}
                                     <div className="flex items-center space-x-3">
                                         <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                                             {pc.name.charAt(0)}
@@ -347,16 +359,20 @@ const PCBuilder = () => {
                                         </h2>
                                     </div>
 
-                                    <div className="flex items-center space-x-2">
-                                        {/* Expand/collapse */}
+                                    {/* Höger: Chevron + status + knappar (klick ska inte toggla) */}
+                                    <div
+                                        className="flex items-center space-x-2"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        {/* Chevron för att indikera expand/collapse */}
                                         <ChevronDownIcon
                                             className={`w-5 h-5 text-gray-500 dark:text-gray-300 transition-transform duration-300 ease-in-out ${expandedPCs.includes(pc.id) ? 'rotate-180' : 'rotate-0'}`}
                                         />
 
-                                        {/* Status-symbol + text */}
+                                        {/* Status */}
                                         <span
                                             className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide
-                                            ${pc.status === "Sold"
+                                                ${pc.status === "Sold"
                                                     ? 'bg-green-100 text-green-700'
                                                     : pc.status === "ForSale"
                                                         ? 'bg-yellow-100 text-yellow-700'
@@ -370,17 +386,108 @@ const PCBuilder = () => {
                                                     : 'Planering'}
                                         </span>
 
-                                        {/* Delete */}
-                                        <button
-                                            onClick={() => {
-                                                setPcToDelete(pc);
-                                                setShowConfirm(true);
-                                            }}
-                                            title="Ta bort bygget"
-                                            className="text-gray-400 hover:text-red-500 text-xl"
-                                        >
-                                            <TrashIcon className="w-5 h-5 text-red-500 hover:text-red-700 cursor-pointer" />
-                                        </button>
+                                        {/* Menyknapp */}
+                                        <div className="relative">
+                                            <button
+                                                onClick={() => toggleMenu(pc.id)}
+                                                className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600"
+                                                title="Fler åtgärder"
+                                            >
+                                                <EllipsisVerticalIcon className="w-5 h-5 text-gray-700 dark:text-white" />
+                                            </button>
+
+                                            {showMenuId === pc.id && (
+                                                <div className="absolute right-0 z-10 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg">
+                                                    <button
+                                                        onClick={() => {
+                                                            setCurrentPC(pc);
+                                                            setPcName(pc.name);
+                                                            setPcDescription(pc.description || "");
+                                                            setPcPrice(pc.price || "");
+                                                            setPcListPrice(pc.listPrice || "");
+                                                            setListedAt(pc.listedAt ? pc.listedAt.split("T")[0] : "");
+                                                            setSoldAt(pc.soldAt ? pc.soldAt.split("T")[0] : "");
+                                                            setShowEditModal(true);
+                                                            setShowMenuId(null);
+                                                        }}
+                                                        className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-white"
+                                                    >
+                                                        <PencilSquareIcon className="w-4 h-4 text-blue-500 group-hover:text-blue-600 transition" />
+                                                        Redigera info
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => {
+                                                            setSalesTextPC(pc);
+                                                            setShowSalesTextModal(true);
+                                                            setShowMenuId(null);
+                                                        }}
+                                                        className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-white"
+                                                    >
+                                                        <DocumentTextIcon className="w-4 h-4 text-indigo-500 group-hover:text-indigo-600 transition" />
+                                                        Generera försäljningstext
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => {
+                                                            handleChangeStatus(pc, pc.status === "Sold" ? "ForSale" : "Sold");
+                                                            setShowMenuId(null);
+                                                        }}
+                                                        className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                    >
+                                                        {pc.status === "Sold" ? (
+                                                            <>
+                                                                <ArrowUturnLeftIcon className="w-4 h-4 text-yellow-600 group-hover:text-yellow-700 dark:text-yellow-400 dark:group-hover:text-yellow-300 transition" />
+                                                                <span>Ångra försäljning</span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                    <CurrencyDollarIcon className="w-4 h-4 text-green-600 group-hover:text-green-700 dark:text-green-400 dark:group-hover:text-green-300 transition" />
+                                                                <span>Markera som såld</span>
+                                                            </>
+                                                        )}
+                                                    </button>
+
+                                                    {pc.status === "Planning" && (
+                                                        <button
+                                                            onClick={() => {
+                                                                handleChangeStatus(pc, "ForSale");
+                                                                setShowMenuId(null);
+                                                            }}
+                                                            className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                        >
+                                                            <TagIcon className="w-4 h-4 text-amber-600 group-hover:text-amber-700 dark:text-amber-400 dark:group-hover:text-amber-300 transition" />
+                                                            <span>Flytta till försäljning</span>
+                                                        </button>
+                                                    )}
+
+                                                    {pc.status === "ForSale" && (
+                                                        <button
+                                                            onClick={() => {
+                                                                handleChangeStatus(pc, "Planning");
+                                                                setShowMenuId(null);
+                                                            }}
+                                                            className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                        >
+                                                            <WrenchScrewdriverIcon className="w-4 h-4 text-sky-600 group-hover:text-sky-700 dark:text-sky-400 dark:group-hover:text-sky-300 transition" />
+                                                            <span>Flytta till planering</span>
+                                                        </button>
+                                                    )}
+
+                                                    <button
+                                                        onClick={() => {
+                                                            setPcToDelete(pc);
+                                                            setShowConfirm(true);
+                                                            setShowMenuId(null);
+                                                        }}
+                                                        className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                    >
+                                                        <TrashIcon className="w-4 h-4 group-hover:text-red-700 dark:group-hover:text-red-300 transition" />
+                                                        Radera PC
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 
@@ -461,7 +568,8 @@ const PCBuilder = () => {
                                         <div className="text-center flex flex-col items-center">
                                             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Prisinformation</h3>
                                             <p className="text-sm text-gray-800 dark:text-gray-100">Total kostnad: <strong>{cost} kr</strong></p>
-                                            <p className="text-sm text-gray-800 dark:text-gray-100">Säljpris: <strong>{price} kr</strong></p>
+                                            <p className="text-sm text-gray-800 dark:text-gray-100">Utgångspris: <strong>{pc.listPrice ?? "–"} kr</strong></p>
+                                            <p className="text-sm text-gray-800 dark:text-gray-100">Slutpris: <strong>{price} kr</strong></p>
                                             <p className={`text-sm font-semibold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                                 Vinst: {profit} kr ({profitPct}%)
                                             </p>
@@ -469,63 +577,9 @@ const PCBuilder = () => {
                                                 <p className="text-sm text-gray-500 dark:text-gray-400">
                                                     Såld: {new Date(pc.soldAt).toLocaleDateString()}
                                                 </p>
-                                            )}
-                                            <button
-                                                onClick={() => {
-                                                    setSalesTextPC(pc);
-                                                    setShowSalesTextModal(true);
-                                                }}
-                                                className="mt-4 px-4 py-2 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white text-sm rounded-lg shadow"
-                                            >
-                                                Generera försäljningstext
-                                            </button>
+                                            )}                                            
                                         </div>
-                                    </div>
-
-                                    <div className="flex justify-center flex-wrap gap-2 mt-4">
-                                        <button
-                                            className="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl font-medium rounded-lg text-sm px-5 py-2.5 cursor-pointer"
-                                            onClick={() => {
-                                                setCurrentPC(pc);
-                                                setPcName(pc.name);
-                                                setPcDescription(pc.description || "");
-                                                setPcPrice(pc.price || "");
-                                                setListedAt(pc.listedAt ? pc.listedAt.split("T")[0] : "");
-                                                setSoldAt(pc.soldAt ? pc.soldAt.split("T")[0] : "");
-                                                setShowEditModal(true);
-                                            }}
-                                        >
-                                            Redigera Info
-                                        </button>
-
-                                        {pc.status === "ForSale" && (
-                                            <button
-                                                onClick={() => handleChangeStatus(pc, "Planning")}
-                                                className="text-white bg-blue-500 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5 cursor-pointer"
-                                            >
-                                                Flytta till planering
-                                            </button>
-                                        )}
-
-                                        {pc.status === "Planning" && (
-                                            <button
-                                                onClick={() => handleChangeStatus(pc, "ForSale")}
-                                                className="text-white bg-blue-500 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5 cursor-pointer"
-                                            >
-                                                Flytta till försäljning
-                                            </button>
-                                        )}
-
-                                        <button
-                                            onClick={() => handleChangeStatus(pc, pc.status === "Sold" ? "ForSale" : "Sold")}
-                                            className={`text-white font-medium rounded-lg text-sm px-5 py-2.5 cursor-pointer transition 
-                                                    ${pc.status === "Sold"
-                                                    ? 'bg-red-600 hover:bg-red-700'
-                                                    : 'bg-green-600 hover:bg-green-700'}`}
-                                        >
-                                            {pc.status === "Sold" ? 'Ångra försäljning' : 'Markera som såld'}
-                                        </button>
-                                    </div>
+                                    </div>                                   
                                 </div>
                             </div>
 
@@ -654,9 +708,20 @@ const PCBuilder = () => {
                             />
                         </div>
 
-                        {/* Pris */}
+                        {/* List-Pris */}
                         <div className="mb-4">
-                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Pris</label>
+                            <label className="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-300">Utgångspris</label>
+                            <input
+                                type="number"
+                                value={pcListPrice}
+                                onChange={(e) => setPcListPrice(e.target.value)}
+                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
+                            />
+                        </div>
+
+                        {/* Sälj-Pris */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Slutpris</label>
                             <input
                                 type="number"
                                 value={pcPrice}
