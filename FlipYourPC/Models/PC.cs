@@ -8,6 +8,7 @@ namespace FlipYourPC.Models
         public required string Name { get; set; }
         public string Description { get; set; }
         public List<Component> Components { get; set; }
+        public int ListPrice { get; set; }
         public int Price { get; set; }
         public string ImageURL { get; set; }
         [Obsolete("Använd Status istället.")]

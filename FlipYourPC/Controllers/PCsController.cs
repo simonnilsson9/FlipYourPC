@@ -147,6 +147,7 @@ namespace FlipYourPC.Controllers
 
                 existingPC.Name = pcDTO.Name;
                 existingPC.Description = pcDTO.Description;
+                existingPC.ListPrice = pcDTO.ListPrice;
                 existingPC.Price = pcDTO.Price;
                 existingPC.ImageURL = pcDTO.ImageURL;
                 existingPC.Status = pcDTO.Status;

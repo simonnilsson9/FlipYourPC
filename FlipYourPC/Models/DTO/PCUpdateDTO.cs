@@ -9,6 +9,8 @@ namespace FlipYourPC.Models.DTO
         public string Name { get; set; }
         public string Description { get; set; }
         [Range(0, int.MaxValue, ErrorMessage = "Pris måste vara 0 eller högre")]
+        public int ListPrice { get; set; }
+        [Range(0, int.MaxValue, ErrorMessage = "Pris måste vara 0 eller högre")]
         public int Price { get; set; }
         public string ImageURL { get; set; }
         public bool IsSold { get; set; }
