@@ -48,6 +48,9 @@ const PCBuilder = () => {
     const [showSalesTextModal, setShowSalesTextModal] = useState(false);
     const [salesTextPC, setSalesTextPC] = useState(null);
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const pcsPerPage = 6; // Antal datorer per sida (justerbart)
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -249,6 +252,11 @@ const PCBuilder = () => {
         setTimeout(() => setAlert(null), 4000); // auto-close efter 4 sek
     };
 
+    const indexOfLastPC = currentPage * pcsPerPage;
+    const indexOfFirstPC = indexOfLastPC - pcsPerPage;
+    const currentPCs = filtered.slice(indexOfFirstPC, indexOfLastPC);
+    const totalPages = Math.ceil(filtered.length / pcsPerPage);
+
     return (
         <div>
             {alert && (
@@ -317,7 +325,7 @@ const PCBuilder = () => {
             {/* --- Kort­grid --- */}
             <div className="flex flex-col items-center">
                 {filtered.length > 0 ? (
-                    filtered.map((pc) => {
+                    currentPCs.map((pc) => {
                         const cost = pc.componentsTotalCost || 0;
                         const price = pc.price || 0;
                         const profit = price - cost;
@@ -527,6 +535,47 @@ const PCBuilder = () => {
                     <p className="text-gray-500 italic">Inga byggen att visa.</p>
                 )}
             </div>
+            {totalPages > 1 && (
+                <div className="flex justify-center mt-4 space-x-1 items-center">
+                    {/* Föregående knapp */}
+                    <button
+                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className={`px-3 py-1 text-sm rounded bg-gray-600 text-white hover:bg-gray-700 transition ${currentPage === 1 ? "cursor-not-allowed" : ""
+                            }`}
+                    >
+                        «
+                    </button>
+
+                    {/* Sidnummer */}
+                    {[...Array(totalPages)].map((_, index) => {
+                        const page = index + 1;
+                        const isActive = currentPage === page;
+                        return (
+                            <button
+                                key={page}
+                                onClick={() => setCurrentPage(page)}
+                                className={`px-3 py-1 text-sm font-medium rounded transition ${isActive
+                                        ? "bg-blue-600 text-white"
+                                        : "bg-gray-600 text-white hover:bg-gray-700"
+                                    }`}
+                            >
+                                {page}
+                            </button>
+                        );
+                    })}
+
+                    {/* Nästa knapp */}
+                    <button
+                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className={`px-3 py-1 text-sm rounded bg-gray-600 text-white hover:bg-gray-700 transition ${currentPage === totalPages ? "ocursor-not-allowed" : ""
+                            }`}
+                    >
+                        »
+                    </button>
+                </div>
+            )}
 
             {/* --- Modaler --- */}
             {showCreateModal && (
