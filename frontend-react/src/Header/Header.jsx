@@ -57,7 +57,7 @@ const Header = () => {
         <nav className="bg-gray-800 border-b border-gray-700 text-white relative">
             <div className="max-w-screen-xl flex items-center justify-between mx-auto p-2 md:p-4 relative">
                 <Link to="/" className="flex items-center space-x-2">
-                    <img src="https://flowbite.com/docs/images/logo.svg" className="h-6 md:h-8" alt="Logo" />
+                    <img src="/PC.png" alt="Logo" className="h-6 md:h-8 object-contain invert" />
                     <span className="hidden md:inline text-xl md:text-2xl font-semibold whitespace-nowrap">FlipYourPCs</span>
                 </Link>
 
