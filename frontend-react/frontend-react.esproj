@@ -12,7 +12,6 @@
     <Folder Include="src\Header\" />
     <Folder Include="src\Inventory\" />
     <Folder Include="src\Login\" />
-    <Folder Include="src\Components\" />
     <Folder Include="src\MyPages\" />
     <Folder Include="src\Admin\" />
     <Folder Include="src\PC-Builder\" />
