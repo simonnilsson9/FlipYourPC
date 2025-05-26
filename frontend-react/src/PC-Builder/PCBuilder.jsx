@@ -590,7 +590,7 @@ const PCBuilder = () => {
                 )}
             </div>
             {totalPages > 1 && (
-                <div className="flex justify-center mt-4 space-x-1 items-center">
+                <div className="flex justify-center mt-4 mb-10 space-x-1 items-center">
                     {/* Föregående knapp */}
                     <button
                         onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
