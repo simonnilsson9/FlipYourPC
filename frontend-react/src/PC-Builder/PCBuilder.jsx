@@ -17,7 +17,8 @@ import {
     fetchInventory,
     removeComponentFromPC,
     saveComponent,
-    calculateVAT
+    calculateVAT,
+    removeVAT
 } from "../services/API";
 
 const PCBuilder = () => {
@@ -247,11 +248,11 @@ const PCBuilder = () => {
         try {
             const token = localStorage.getItem("accessToken");
             await calculateVAT(pc.id, token);
-            fetchPCs();
-            showAlert("Moms har räknats ut!");            
+            fetchPCs(); 
+            showAlert("success", "Moms beräknad", "Momsen har beräknats.");
         } catch (error) {
             console.error(error);
-            showAlert("Fel vid momsberäkning.");
+            showAlert("error", "Fel", "Kunde inte beräkna moms.");
         }
     };
 
@@ -502,7 +503,10 @@ const PCBuilder = () => {
                                                     )}
 
                                                     <button
-                                                        onClick={() => handleCalculateVAT(pc)}
+                                                        onClick={() => {
+                                                            setShowMenuId(null);
+                                                            handleCalculateVAT(pc);
+                                                        }}
                                                         className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                                                     >
                                                         <CalculatorIcon className="w-4 h-4 text-purple-600 group-hover:text-purple-700 dark:text-purple-400 dark:group-hover:text-purple-300 transition" />
