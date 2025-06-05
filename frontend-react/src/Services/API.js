@@ -400,3 +400,19 @@ export const exportPCs = async (queryString = "") => {
     const blob = await response.blob();
     return blob;
 };
+
+export const calculateVAT = async (pcId, token) => {
+    const response = await fetch(`${API_URL}/pcs/${pcId}/calculate-vat`, {
+        method: "PUT",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error("Kunde inte beräkna moms.");
+    }
+
+    return await response.json();
+};

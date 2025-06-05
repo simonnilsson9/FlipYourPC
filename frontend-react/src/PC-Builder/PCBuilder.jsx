@@ -7,7 +7,7 @@ import ConfirmDeleteModal from "../Components/ConfirmDeleteModal";
 import ComponentModal from "../Components/ComponentModal";
 import SalesTextPopup from "../Components/SalesTextPopup";
 import ExportPCs from "../Export/ExportPCs";
-import { WrenchScrewdriverIcon, ShoppingCartIcon, ChevronDownIcon, TrashIcon, TagIcon, PencilSquareIcon, PlusIcon, EllipsisVerticalIcon, DocumentTextIcon, ArrowUturnLeftIcon, CurrencyDollarIcon } from '@heroicons/react/24/solid';
+import { WrenchScrewdriverIcon, ShoppingCartIcon, ChevronDownIcon, TrashIcon, TagIcon, PencilSquareIcon, PlusIcon, EllipsisVerticalIcon, DocumentTextIcon, ArrowUturnLeftIcon, CurrencyDollarIcon, CalculatorIcon } from '@heroicons/react/24/solid';
 import {
     getAllPCs,
     createPC,
@@ -16,7 +16,8 @@ import {
     updatePC,
     fetchInventory,
     removeComponentFromPC,
-    saveComponent
+    saveComponent,
+    calculateVAT
 } from "../services/API";
 
 const PCBuilder = () => {
@@ -239,6 +240,18 @@ const PCBuilder = () => {
         } catch (err) {
             console.error("Image update failed:", err);
             showAlert("error", "Fel", "Kunde inte spara bilden.");
+        }
+    };
+
+    const handleCalculateVAT = async (pc) => {
+        try {
+            const token = localStorage.getItem("accessToken");
+            await calculateVAT(pc.id, token);
+            fetchPCs();
+            showAlert("Moms har räknats ut!");            
+        } catch (error) {
+            console.error(error);
+            showAlert("Fel vid momsberäkning.");
         }
     };
 
@@ -475,6 +488,14 @@ const PCBuilder = () => {
                                                     )}
 
                                                     <button
+                                                        onClick={() => handleCalculateVAT(pc)}
+                                                        className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                    >
+                                                        <CalculatorIcon className="w-4 h-4 text-purple-600 group-hover:text-purple-700 dark:text-purple-400 dark:group-hover:text-purple-300 transition" />
+                                                        <span>Beräkna moms</span>
+                                                    </button>
+
+                                                    <button
                                                         onClick={() => {
                                                             setPcToDelete(pc);
                                                             setShowConfirm(true);
@@ -570,6 +591,12 @@ const PCBuilder = () => {
                                             <p className="text-sm text-gray-800 dark:text-gray-100">Total kostnad: <strong>{cost} kr</strong></p>
                                             <p className="text-sm text-gray-800 dark:text-gray-100">Utgångspris: <strong>{pc.listPrice ?? "–"} kr</strong></p>
                                             <p className="text-sm text-gray-800 dark:text-gray-100">Slutpris: <strong>{price} kr</strong></p>
+                                            <p className="text-sm text-gray-800 dark:text-gray-100">
+                                                Ingående moms: <strong>{pc.deductibleVAT ?? "–"} kr</strong>
+                                            </p>
+                                            <p className="text-sm text-gray-800 dark:text-gray-100">
+                                                Utgående moms: <strong>{pc.outgoingVAT ?? "–"} kr</strong>
+                                            </p>
                                             <p className={`text-sm font-semibold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                                 Vinst: {profit} kr ({profitPct}%)
                                             </p>
@@ -577,7 +604,7 @@ const PCBuilder = () => {
                                                 <p className="text-sm text-gray-500 dark:text-gray-400">
                                                     Såld: {new Date(pc.soldAt).toLocaleDateString()}
                                                 </p>
-                                            )}                                            
+                                            )}
                                         </div>
                                     </div>                                   
                                 </div>

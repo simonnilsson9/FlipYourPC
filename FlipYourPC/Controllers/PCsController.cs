@@ -214,16 +214,16 @@ namespace FlipYourPC.Controllers
 
         [Authorize(Roles = "Användare,Admin")]
         [HttpPut("{pcId:guid}/calculate-vat")]
-        public async Task<IActionResult> CalculateVAT([FromRoute] Guid id)
+        public async Task<IActionResult> CalculateVAT([FromRoute(Name = "pcId")] Guid pcId)
         {
             try
             {
-                var pc = await _pcService.GetPCByIdAsync(id);
+                var pc = await _pcService.GetPCByIdAsync(pcId);
                 if (pc == null)
                 {
                     return NotFound(new { message = "PC not found." });
                 }
-                await _pcService.CalculateVATAsync(id);
+                await _pcService.CalculateVATAsync(pcId);
                 return Ok(new { message = "VAT calculated successfully.", pc });
             }
             catch (Exception ex)
