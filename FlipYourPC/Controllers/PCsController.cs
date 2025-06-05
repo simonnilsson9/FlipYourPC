@@ -231,5 +231,29 @@ namespace FlipYourPC.Controllers
                 return StatusCode(500, new { message = $"Error calculating VAT: {ex.Message}" });
             }
         }
+
+        [Authorize(Roles = "Användare,Admin")]
+        [HttpPut("{pcId:guid}/remove-vat")]
+        public async Task<IActionResult> RemoveVAT([FromRoute] Guid pcId)
+        {
+            try
+            {
+                var pc = await _pcService.GetPCByIdAsync(pcId);
+                if (pc == null)
+                    return NotFound(new { message = "PC not found." });
+
+                pc.DeductibleVAT = 0;
+                pc.OutgoingVAT = 0;
+                pc.VATCalculated = false;
+
+                await _pcService.UpdatePCAsync(pc);
+
+                return Ok(new { message = "VAT removed.", pc });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error removing VAT: {ex.Message}" });
+            }
+        }
     }
 }

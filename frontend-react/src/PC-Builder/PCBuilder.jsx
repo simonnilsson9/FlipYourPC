@@ -255,6 +255,20 @@ const PCBuilder = () => {
         }
     };
 
+    const handleRemoveVAT = async (pc) => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+
+        try {
+            await removeVAT(pc.id, token);
+            fetchPCs();
+            showAlert("success", "Moms borttagen", "Momsen har tagits bort.");
+        } catch (err) {
+            console.error(err);
+            showAlert("error", "Fel", "Kunde inte ta bort moms.");
+        }
+    };
+
     const confirmDeletePC = async () => {
         if (pcToDelete) {
             await handleDeletePC(pcToDelete.id);
@@ -494,6 +508,19 @@ const PCBuilder = () => {
                                                         <CalculatorIcon className="w-4 h-4 text-purple-600 group-hover:text-purple-700 dark:text-purple-400 dark:group-hover:text-purple-300 transition" />
                                                         <span>Beräkna moms</span>
                                                     </button>
+
+                                                    {(pc.vatCalculated &&
+                                                        <button
+                                                            onClick={() => {
+                                                                handleRemoveVAT(pc);
+                                                                setShowMenuId(null);
+                                                            }}
+                                                            className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                        >
+                                                            <CalculatorIcon className="w-4 h-4 text-red-600 group-hover:text-red-700 dark:text-red-400 dark:group-hover:text-red-300 transition" />
+                                                            <span>Ta bort moms</span>
+                                                        </button>
+                                                    )}
 
                                                     <button
                                                         onClick={() => {

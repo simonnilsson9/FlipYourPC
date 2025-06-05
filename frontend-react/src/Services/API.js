@@ -416,3 +416,19 @@ export const calculateVAT = async (pcId, token) => {
 
     return await response.json();
 };
+
+export const removeVAT = async (pcId, token) => {
+    const response = await fetch(`${API_URL}/PCs/${pcId}/remove-vat`, {
+        method: "PUT",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error("Kunde inte ta bort moms.");
+    }
+
+    return await response.json();
+};
