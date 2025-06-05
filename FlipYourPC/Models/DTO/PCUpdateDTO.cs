@@ -17,6 +17,9 @@ namespace FlipYourPC.Models.DTO
         public DateTime ListedAt { get; set; }
         public DateTime? SoldAt { get; set; }
         public PCStatus Status { get; set; }
+        public decimal DeductibleVAT { get; set; }
+        public decimal OutgoingVAT { get; set; }
+        public bool VATCalculated { get; set; }
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             var errors = new List<ValidationResult>();

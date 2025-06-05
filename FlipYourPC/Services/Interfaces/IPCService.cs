@@ -12,5 +12,6 @@ namespace FlipYourPC.Services.Interfaces
         Task DeletePCAsync(PC pc);
         Task AddComponentToPCAsync(Guid pcID, List<Guid> componentIds);
         Task RemoveComponentFromPCAsync(Guid pcId, List<Guid> componentIds);
+        Task CalculateVATAsync(Guid pcId);
     }
 }

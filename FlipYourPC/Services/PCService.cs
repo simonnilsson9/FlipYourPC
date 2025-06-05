@@ -162,5 +162,36 @@ namespace FlipYourPC.Services
 
             await _appDbContext.SaveChangesAsync();
         }
+
+        public async Task CalculateVATAsync(Guid pcId)
+        {
+            var userId = GetCurrentUserId();
+            var pc = await _appDbContext.PCs.
+                Include(p => p.Components).
+                FirstOrDefaultAsync(p => p.Id == pcId && p.UserId == userId);
+
+            if(pc == null)
+            {
+                throw new ArgumentException("PC not found or it does not belong to the current user.");
+            }
+
+            const double vatRate = 0.25;
+
+            // 1. Ingående moms – på nya komponenter
+            var deductibleVAT = pc.Components
+                .Where(c => c.Condition == ComponentCondition.New)
+                .Sum(c => (int)Math.Round(c.Price * vatRate / (1 + vatRate)));
+
+            // 2. Utgående moms – på försäljningspris eller listpris
+            var basePrice = pc.Price > 0 ? pc.Price : pc.ListPrice;
+            var outgoingVAT = (int)Math.Round(basePrice * vatRate / (1 + vatRate));
+
+            pc.DeductibleVAT = deductibleVAT;
+            pc.OutgoingVAT = outgoingVAT;
+            pc.VATCalculated = true;
+
+            await _appDbContext.SaveChangesAsync();
+
+        }
     }
 }

@@ -19,6 +19,9 @@ namespace FlipYourPC.Models
         public DateTime ListedAt { get; set; }
         public DateTime? SoldAt { get; set; }
         public PCStatus Status { get; set; } = PCStatus.Planning; // Default är "Planning"
+        public decimal DeductibleVAT { get; set; } = 0; 
+        public decimal OutgoingVAT { get; set; } = 0;
+        public bool VATCalculated { get; set; } = false;
     }
     
     public enum PCStatus

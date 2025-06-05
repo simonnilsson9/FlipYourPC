@@ -153,6 +153,9 @@ namespace FlipYourPC.Controllers
                 existingPC.Status = pcDTO.Status;
                 existingPC.ListedAt = pcDTO.ListedAt;
                 existingPC.SoldAt = pcDTO.SoldAt;
+                existingPC.DeductibleVAT = pcDTO.DeductibleVAT;
+                existingPC.OutgoingVAT = pcDTO.OutgoingVAT;
+                existingPC.VATCalculated = pcDTO.VATCalculated;
 
                 await _pcService.UpdatePCAsync(existingPC);
 
@@ -206,6 +209,26 @@ namespace FlipYourPC.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = $"Error removing component: {ex.Message}" });
+            }
+        }
+
+        [Authorize(Roles = "Användare,Admin")]
+        [HttpPut("{pcId:guid}/calculate-vat")]
+        public async Task<IActionResult> CalculateVAT([FromRoute] Guid id)
+        {
+            try
+            {
+                var pc = await _pcService.GetPCByIdAsync(id);
+                if (pc == null)
+                {
+                    return NotFound(new { message = "PC not found." });
+                }
+                await _pcService.CalculateVATAsync(id);
+                return Ok(new { message = "VAT calculated successfully.", pc });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error calculating VAT: {ex.Message}" });
             }
         }
     }
