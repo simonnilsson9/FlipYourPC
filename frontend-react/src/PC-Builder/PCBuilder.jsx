@@ -145,7 +145,10 @@ const PCBuilder = () => {
             listedAt: listedAt || currentPC.listedAt,
             soldAt: soldAt === "" ? null : soldAt,
             status: currentPC.status, 
-            listPrice: parseInt(pcListPrice)
+            listPrice: parseInt(pcListPrice),
+            deductibleVAT: currentPC.deductibleVAT,
+            outgoingVAT: currentPC.outgoingVAT,
+            vatCalculated: currentPC.vatCalculated
         };
 
         const result = await updatePC(currentPC.id, pcUpdateData);
@@ -209,7 +212,10 @@ const PCBuilder = () => {
                 imageURL: pc.imageURL,
                 listedAt: pc.listedAt,
                 soldAt: newStatus === "Sold" ? new Date().toISOString() : null,
-                status: newStatus
+                status: newStatus,
+                deductibleVAT: pc.deductibleVAT,
+                outgoingVAT: pc.outgoingVAT,
+                vatCalculated: pc.vatCalculated
             }, token);
 
             fetchPCs();
@@ -233,7 +239,10 @@ const PCBuilder = () => {
                 imageURL: url,
                 listedAt: pc.listedAt,
                 soldAt: pc.soldAt,
-                status: pc.status
+                status: pc.status,
+                deductibleVAT: pc.deductibleVAT,
+                outgoingVAT: pc.outgoingVAT,
+                vatCalculated: pc.vatCalculated
             }, token);
 
             fetchPCs();
@@ -617,25 +626,58 @@ const PCBuilder = () => {
                                         </div>
 
                                         {/* Prisinfo */}
-                                        <div className="text-center flex flex-col items-center">
-                                            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Prisinformation</h3>
-                                            <p className="text-sm text-gray-800 dark:text-gray-100">Total kostnad: <strong>{cost} kr</strong></p>
-                                            <p className="text-sm text-gray-800 dark:text-gray-100">Utgångspris: <strong>{pc.listPrice ?? "–"} kr</strong></p>
-                                            <p className="text-sm text-gray-800 dark:text-gray-100">Slutpris: <strong>{price} kr</strong></p>
-                                            <p className="text-sm text-gray-800 dark:text-gray-100">
-                                                Ingående moms: <strong>{pc.deductibleVAT ?? "–"} kr</strong>
-                                            </p>
-                                            <p className="text-sm text-gray-800 dark:text-gray-100">
-                                                Utgående moms: <strong>{pc.outgoingVAT ?? "–"} kr</strong>
-                                            </p>
-                                            <p className={`text-sm font-semibold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                                Vinst: {profit} kr ({profitPct}%)
-                                            </p>
-                                            {pc.soldAt && (
-                                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                    Såld: {new Date(pc.soldAt).toLocaleDateString()}
-                                                </p>
-                                            )}
+                                        <div className="w-full max-w-xs bg-white dark:bg-gray-800 rounded-xl shadow p-4 text-sm text-gray-800 dark:text-gray-100">
+                                            <h3 className="text-base font-semibold text-center text-gray-700 dark:text-gray-200 mb-3">
+                                                Prisinformation
+                                            </h3>
+
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between">
+                                                    <span>Total kostnad:</span>
+                                                    <strong>{cost} kr</strong>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span>Utgångspris:</span>
+                                                    <strong>{pc.listPrice ?? "–"} kr</strong>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span>Slutpris:</span>
+                                                    <strong>{price} kr</strong>
+                                                </div>
+
+                                                <div className="flex justify-between font-semibold pt-2 border-t border-gray-300 dark:border-gray-600 mt-2">
+                                                    <span>Vinst:</span>
+                                                    <span className={`${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                        {profit} kr ({profitPct}%)
+                                                    </span>
+                                                </div>
+
+                                                {pc.vatCalculated && (
+                                                    <div className="pt-4 mt-2 border-t border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 space-y-1">
+                                                        <div className="flex justify-between">
+                                                            <span>Ingående moms:</span>
+                                                            <strong>{pc.deductibleVAT ?? "–"} kr</strong>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                            <span>Utgående moms:</span>
+                                                            <strong>{pc.outgoingVAT ?? "–"} kr</strong>
+                                                        </div>
+                                                        <div className="flex justify-between font-medium pt-1 border-t border-gray-300 dark:border-gray-600 mt-2 text-gray-800 dark:text-gray-100">
+                                                            <span>Total moms att betala:</span>
+                                                            <span className={`${(pc.outgoingVAT ?? 0) - (pc.deductibleVAT ?? 0) >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                                                {(pc.outgoingVAT ?? 0) - (pc.deductibleVAT ?? 0)} kr
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {pc.soldAt && (
+                                                    <div className="flex justify-between text-gray-500 dark:text-gray-400 pt-2">
+                                                        <span>Såld:</span>
+                                                        <span>{new Date(pc.soldAt).toLocaleDateString()}</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>                                   
                                 </div>
