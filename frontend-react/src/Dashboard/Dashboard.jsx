@@ -15,7 +15,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineEleme
 
 const Dashboard = () => {
     const [stats, setStats] = useState(null);
-    const [filter, setFilter] = useState('custom');
+    const [filter, setFilter] = useState('all');
     const [customRange, setCustomRange] = useState({
         from: format(new Date(new Date().getFullYear(), 0, 1), 'yyyy-MM-dd'),
         to: format(new Date(), 'yyyy-MM-dd')
